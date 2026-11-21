@@ -4,14 +4,29 @@ import { useState } from "react";
 import Link from "next/link";
 import { PRODUCTS, FILTERS } from "@/data/site";
 import { ImageSlot } from "./ImageSlot";
-import { WHATSAPP } from "@/data/kontakt";
+import { WHATSAPP, telFuer } from "@/data/kontakt";
 
-/** Vorausgefüllte WhatsApp-Nachricht, damit nicht jeder "Hallo?" schreiben muss. */
-function whatsappLink(name: string, loc?: string) {
-  const text = `Hallo! Ich interessiere mich für „${name}“${
-    loc ? ` (${loc})` : ""
-  }. Ist das Stück noch da?`;
-  return `https://wa.me/${WHATSAPP.e164}?text=${encodeURIComponent(text)}`;
+/**
+ * Erste Schaltfläche der Karte.
+ *
+ * Solange keine WhatsApp-Nummer bestätigt ist, steht dort "Anrufen" mit der
+ * Nummer des Marktes, in dem das Stück steht. Sobald WHATSAPP.e164 gesetzt
+ * ist, wird daraus von selbst der WhatsApp-Knopf mit vorausgefüllter
+ * Nachricht — damit nicht jeder mit "Hallo?" anfangen muss.
+ */
+function frageCta(name: string, loc?: string) {
+  if (WHATSAPP.e164) {
+    const text = `Hallo! Ich interessiere mich für „${name}“${
+      loc ? ` (${loc})` : ""
+    }. Ist das Stück noch da?`;
+    return {
+      label: "Per WhatsApp fragen",
+      href: `https://wa.me/${WHATSAPP.e164}?text=${encodeURIComponent(text)}`,
+      extern: true,
+    };
+  }
+  const t = telFuer(loc);
+  return { label: `Anrufen · ${t.nummer}`, href: `tel:${t.tel}`, extern: false };
 }
 
 export function ShopGrid() {
@@ -58,9 +73,14 @@ export function ShopGrid() {
                     sizes="(max-width: 620px) 92vw, (max-width: 1000px) 46vw, 31vw"
                     priority={i < 3}
                   />
-                  {p.flag && <span className="prod__flag">{p.flag}</span>}
-                  {!p.flag && p.bestell && (
-                    <span className="prod__flag prod__flag--quiet">Auf Anfrage</span>
+                  {/* Jede Karte sagt, woran man ist: Abverkauf und Co. laut,
+                      der Normalfall leise. */}
+                  {p.flag ? (
+                    <span className="prod__flag">{p.flag}</span>
+                  ) : (
+                    <span className="prod__flag prod__flag--quiet">
+                      {p.bestell ? "Auf Anfrage" : "Im Markt verfügbar"}
+                    </span>
                   )}
                 </div>
 
@@ -125,14 +145,20 @@ export function ShopGrid() {
                         )}
                       </dl>
                       <div className="prod__cta">
-                        <a
-                          className="btn btn--sm btn--block btn--solid"
-                          href={whatsappLink(p.name, p.loc)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Per WhatsApp fragen
-                        </a>
+                        {(() => {
+                          const cta = frageCta(p.name, p.loc);
+                          return (
+                            <a
+                              className="btn btn--sm btn--block btn--solid"
+                              href={cta.href}
+                              {...(cta.extern
+                                ? { target: "_blank", rel: "noopener noreferrer" }
+                                : {})}
+                            >
+                              {cta.label}
+                            </a>
+                          );
+                        })()}
                         <Link href="/standorte" className="btn btn--sm btn--block">
                           Weg zum Markt
                         </Link>

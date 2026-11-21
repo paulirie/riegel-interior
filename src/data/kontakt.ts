@@ -1,29 +1,33 @@
-/* Kontaktwege, die aus dem Shop heraus angeboten werden.
+/* Kontaktwege, die aus dem Shop heraus angeboten werden. */
+
+/**
+ * WhatsApp.
  *
- * ────────────────────────────────────────────────────────────────────────
- *  ⚠ ZU PRÜFEN: Läuft WhatsApp wirklich auf dieser Nummer?
+ * e164 ist absichtlich leer: Es ist nicht bestätigt, über welche Nummer
+ * WhatsApp läuft. Keines der 196 Kleinanzeigen-Inserate erwähnt WhatsApp,
+ * riegel-interior.de auch nicht. Das Kleinanzeigen-Profil führt als zweiten
+ * Kontakt die Mobilnummer 0162 572 7008 — naheliegend, aber geraten, und eine
+ * geratene Nummer würde Kundennachrichten zu einem Fremden schicken.
  *
- *  Keines der 196 Kleinanzeigen-Inserate erwähnt WhatsApp, und auf
- *  riegel-interior.de steht es auch nicht. Die Nummer unten ist die
- *  Mobilnummer, die das eigene Kleinanzeigen-Profil als zweiten Kontakt
- *  führt — naheliegend, aber nicht bestätigt.
- *
- *  Stimmt sie nicht, landen Kundennachrichten bei einem Fremden. Vor dem
- *  Livegang bestätigen lassen; danach genügt es, diese eine Stelle zu
- *  ändern.
- * ────────────────────────────────────────────────────────────────────────
+ * Solange e164 leer ist, zeigt die Produktkarte "Anrufen" mit der Nummer des
+ * jeweiligen Marktes. Sobald die richtige Nummer feststeht, hier eintragen —
+ * internationales Format ohne + und ohne führende 0, also z. B.
+ * "491625727008" für 0162 572 7008. Der WhatsApp-Knopf erscheint dann von
+ * selbst, samt vorausgefüllter Nachricht. Sonst ist nichts zu ändern.
  */
 export const WHATSAPP = {
-  /** internationales Format ohne +, führende 0 entfällt — für wa.me */
-  e164: "491625727008",
-  /** so, wie es jemand lesen würde */
-  display: "0162 572 7008",
+  e164: "",
+  display: "",
 };
 
-export const TELEFON = {
-  wesel: { nummer: "0281 147 93 270", tel: "+4928114793270" },
-  schermbeck: { nummer: "0281 147 93 270", tel: "+4928114793270" },
-  haltern: { nummer: "02364 50 99 515", tel: "+4923645099515" },
-};
+type Kontakt = { nummer: string; tel: string };
+
+const WESEL: Kontakt = { nummer: "0281 147 93 270", tel: "+4928114793270" };
+const HALTERN: Kontakt = { nummer: "02364 50 99 515", tel: "+4923645099515" };
+
+/** Wesel und der Lagerverkauf Schermbeck hängen an derselben Nummer. */
+export function telFuer(loc?: string): Kontakt {
+  return loc?.includes("Haltern") ? HALTERN : WESEL;
+}
 
 export const MAIL = "shop@riegel-interior.com";
