@@ -4,6 +4,8 @@ import { ManufakturVideo } from "@/components/ManufakturVideo";
 import { Ticker } from "@/components/Ticker";
 import { CountUp } from "@/components/CountUp";
 import { CategoryRail } from "@/components/CategoryRail";
+import { ProductRail } from "@/components/ProductRail";
+import { PRODUCTS } from "@/data/site";
 
 const CATS = [
   { slot: "Esstische", nm: "Esstische", ct: "Eiche · Suar · Teak", img: "/img/kat-esstische.jpg" },
@@ -220,11 +222,30 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── GERADE IM MARKT ── */}
+      <section className="section stock">
+        <div className="wrap">
+          <div className="cats__head">
+            <div data-reveal="">
+              <p className="eyebrow">05 — Gerade im Markt</p>
+              <h2 className="mt-s">
+                Steht bei uns.<br />Heute noch.
+              </h2>
+            </div>
+            <Link href="/shop" className="link" data-reveal="" data-reveal-delay="2">
+              Zum Shop <span className="arr">→</span>
+            </Link>
+          </div>
+        </div>
+
+        <ProductRail items={PRODUCTS} />
+      </section>
+
       {/* ── HOLZARTEN ── */}
       <section className="section woods">
         <div className="wrap">
           <p className="eyebrow" data-reveal="" style={{ marginBottom: 46 }}>
-            05 — Unsere Hölzer
+            06 — Unsere Hölzer
           </p>
           <div className="wood-row">
             {WOODS.map((w, i) => (
@@ -242,7 +263,7 @@ export default function Home() {
         <div className="wrap">
           <div className="cats__head">
             <div data-reveal="">
-              <p className="eyebrow">06 — Standorte</p>
+              <p className="eyebrow">07 — Standorte</p>
               <h2 className="mt-s">Besuch uns<br />in NRW.</h2>
             </div>
             <Link href="/standorte" className="link" data-reveal="" data-reveal-delay="2">
@@ -308,7 +329,7 @@ export default function Home() {
               />
             </div>
             <div>
-              <p className="eyebrow" data-reveal="">07 — Familie</p>
+              <p className="eyebrow" data-reveal="">08 — Familie</p>
               <h2 className="mt-s" data-reveal="" data-reveal-delay="1">
                 Ein Familien&shy;betrieb<br />in zweiter Generation.
               </h2>

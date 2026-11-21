@@ -1,54 +1,177 @@
-/* Produktdaten — Beispiel; Preise & Maße bitte durch echte Werte ersetzen. */
+/* Produktdaten.
+ *
+ * Alles hier steht so auf den Preisschildern im Markt oder ist auf den
+ * eigenen Fotos zu sehen. Die Bilder sind Ausschnitte aus unseren eigenen
+ * Showroom-Aufnahmen (public/img/prod/) — kein fremdes Bildmaterial.
+ *
+ * Wo auf dem Schild kein Preis zu lesen war, steht price: null. Die Karte
+ * zeigt dann "Preis im Markt" statt einer erfundenen Zahl.
+ */
 
 export type Product = {
   id: string;
   cat: string;
   name: string;
   sub: string;
-  price: string;
-  from: boolean;
-  masse: string;
-  material: string;
-  extra: string;
-  colors: string[];
-  cnames: string;
+  img: string;
+  /** null = Preis nicht hinterlegt, Karte zeigt "Preis im Markt" */
+  price: string | null;
+  /** durchgestrichener Vorher-Preis, wenn es ein Abverkauf ist */
+  was?: string;
+  masse?: string;
+  material?: string;
+  extra?: string;
+  /** Einzelstück — kommt so kein zweites Mal */
+  unikat?: boolean;
 };
 
 export const PRODUCTS: Product[] = [
-  { id: "p-eiche-baumkante", cat: "esstische", name: "Esstisch „Baumkante“", sub: "Eiche massiv · geölt", price: "1.290", from: true,
-    masse: "180 × 90 × 76 cm", material: "Eiche massiv, naturgeölt", extra: "Auch 200 / 220 / 260 cm", colors: ["#caa472", "#8a6a45", "#5a4631", "#2c2620"], cnames: "Natur · Cognac · Smoked · Black" },
-  { id: "p-suar-unikat", cat: "esstische", name: "Suar-Tisch „Unikat“", sub: "Suar massiv · Baumstamm", price: "1.890", from: true,
-    masse: "220 × 100 × 76 cm", material: "Suar (Akazie) massiv", extra: "Jede Platte ein Einzelstück", colors: ["#b58f5e", "#7c5e3c", "#3a2e20"], cnames: "Natur · Cognac · Smoked" },
-  { id: "p-stuhl-cognac", cat: "stuehle", name: "Stuhl „Cognac“", sub: "Echtleder · Eichenbeine", price: "189", from: false,
-    masse: "46 × 55 × 88 cm", material: "Echtleder, Gestell Eiche", extra: "Stapelbar bis 4 Stück", colors: ["#9c6b3f", "#2c2620", "#6c655b"], cnames: "Cognac · Schwarz · Grau" },
-  { id: "p-sofa-cloud", cat: "sofas", name: "Sofa „Cloud“ 3-Sitzer", sub: "Webstoff · Federkern", price: "1.490", from: true,
-    masse: "232 × 102 × 84 cm", material: "Webstoff, Federkern, Holzgestell", extra: "Auch als Ecksofa / 2-Sitzer", colors: ["#b9b2a4", "#6c655b", "#34302a", "#d8d2c6"], cnames: "Sand · Stein · Anthrazit · Creme" },
-  { id: "p-sideboard-teak", cat: "anrichten", name: "Sideboard „Teak“", sub: "Teak massiv · 3 Türen", price: "890", from: true,
-    masse: "180 × 45 × 75 cm", material: "Teak massiv, geölt", extra: "Passende Anrichte & Highboard erhältlich", colors: ["#a87f4f", "#5a4631"], cnames: "Natur · Smoked" },
-  { id: "p-anrichte-eiche", cat: "anrichten", name: "Anrichte „Eiche“", sub: "Eiche massiv · Serie Vest", price: "1.190", from: true,
-    masse: "200 × 48 × 80 cm", material: "Eiche massiv, Soft-Close", extra: "Serie: Sideboard, Schrank, Lowboard", colors: ["#caa472", "#8a6a45", "#2c2620"], cnames: "Natur · Cognac · Black" },
-  { id: "p-couchtisch-treibholz", cat: "accessoires", name: "Couchtisch „Treibholz“", sub: "Treibholz · Glasplatte", price: "390", from: false,
-    masse: "110 × 70 × 40 cm", material: "Treibholz, Sicherheitsglas", extra: "Naturgewachsen — Form variiert", colors: ["#b09a7c", "#7c6a52"], cnames: "Natur hell · Natur dunkel" },
-  { id: "p-schrank-eiche", cat: "schraenke", name: "Kleiderschrank „Massiv“", sub: "Eiche massiv · 3-türig", price: "1.690", from: true,
-    masse: "150 × 60 × 210 cm", material: "Eiche massiv, Echtholzfront", extra: "Auch 2- & 4-türig", colors: ["#caa472", "#8a6a45", "#2c2620"], cnames: "Natur · Cognac · Black" },
-  { id: "p-teppich-wolle", cat: "textil", name: "Teppich „Berber“", sub: "Reine Schurwolle", price: "299", from: true,
-    masse: "200 × 300 cm", material: "100 % Schurwolle, handgewebt", extra: "Auch 160×230 & 240×340 cm", colors: ["#e7e0d2", "#b9b2a4", "#34302a"], cnames: "Creme · Stein · Anthrazit" },
-  { id: "p-kissen-set", cat: "textil", name: "Kissen-Set „Leinen“", sub: "2er-Set · Leinen", price: "49", from: false,
-    masse: "50 × 50 cm", material: "Gewaschenes Leinen, Reißverschluss", extra: "Viele Farben kombinierbar", colors: ["#d8d2c6", "#b9a98c", "#6c655b", "#34302a"], cnames: "Creme · Sand · Grau · Schwarz" },
-  { id: "p-leuchte-teak", cat: "lampen", name: "Stehleuchte „Teak“", sub: "Teak · Leinenschirm", price: "149", from: false,
-    masse: "Ø 40 × 160 cm", material: "Teakfuß, Leinenschirm", extra: "Passende Tischleuchte erhältlich", colors: ["#a87f4f", "#e7e0d2"], cnames: "Teak natur · Schirm creme" },
-  { id: "p-schale-teak", cat: "accessoires", name: "Deko-Schale „Wurzelholz“", sub: "Teak-Wurzel · Unikat", price: "39", from: false,
-    masse: "ca. Ø 30 × 12 cm", material: "Teak-Wurzelholz, naturbelassen", extra: "Jedes Stück einzigartig", colors: ["#b09a7c", "#7c6a52"], cnames: "Natur hell · Natur dunkel" },
+  {
+    id: "stuhl-sam",
+    cat: "stuehle",
+    name: "Stuhl Sam 2.0",
+    sub: "Webstoff · mit Drehfunktion",
+    img: "/img/prod/stuhl-sam.jpg",
+    price: "249",
+    material: "Webstoff, Gestell Metall schwarz",
+    extra: "Zwei weitere Farben erhältlich",
+  },
+  {
+    id: "stuhl-dave",
+    cat: "stuehle",
+    name: "Stuhl Dave",
+    sub: "Freischwinger ohne Armlehne",
+    img: "/img/prod/stuhl-dave.jpg",
+    price: "189",
+    was: "299",
+    material: "Bezug in Lederoptik, Kufengestell schwarz",
+    extra: "Bestellware · weitere Farben möglich",
+  },
+  {
+    id: "ecksofa-glimminge",
+    cat: "sofas",
+    name: "Ecksofa Glimminge",
+    sub: "Breitcord · Récamiere",
+    img: "/img/prod/ecksofa.jpg",
+    price: "1.595",
+    material: "Breitcord creme",
+    extra: "Abverkauf — nur solange der Vorrat reicht",
+  },
+  {
+    id: "couchtisch-suar",
+    cat: "tische",
+    name: "Couchtisch Suar 80 × 80",
+    sub: "Suar massiv · Baumscheibe",
+    img: "/img/prod/couchtisch-suar.jpg",
+    price: "595",
+    was: "695",
+    masse: "80 × 80 cm",
+    material: "Suar massiv",
+    unikat: true,
+  },
+  {
+    id: "bar-suar-root",
+    cat: "tische",
+    name: "Bar-Tisch Suar-Root",
+    sub: "Gewachsene Wurzel · Einzelstück",
+    img: "/img/prod/bar-suar.jpg",
+    price: "4.990",
+    masse: "ca. 400 cm lang",
+    material: "Suar-Wurzel, massiv",
+    extra: "Steht in Wesel — bitte vorher anrufen",
+    unikat: true,
+  },
+  {
+    id: "tisch-suar-rund",
+    cat: "tische",
+    name: "Baumscheibentisch rund",
+    sub: "Suar massiv · Vollscheibe",
+    img: "/img/prod/tisch-suar-rund.jpg",
+    price: null,
+    material: "Suar massiv, Mittelfuß schwarz",
+    extra: "Jede Scheibe wächst anders — Maß und Preis im Markt",
+    unikat: true,
+  },
+  {
+    id: "beistelltisch-baumscheibe",
+    cat: "tische",
+    name: "Beistelltisch Baumscheibe",
+    sub: "Teak massiv · drei Höhen",
+    img: "/img/prod/beistelltisch.jpg",
+    price: null,
+    material: "Teak massiv, naturbelassen",
+    extra: "Einzeln oder als Gruppe",
+    unikat: true,
+  },
+  {
+    id: "tischplatte-eiche",
+    cat: "platten",
+    name: "Tischplatte Eiche",
+    sub: "Schweizer Schnitte · vollmassiv",
+    img: "/img/prod/tischplatte.jpg",
+    price: "450",
+    masse: "140 / 200 / 240 cm, 4 cm stark",
+    material: "Eiche vollmassiv, Schweizer Schnitte",
+    extra: "140 cm 450 € (statt 599) · 200 cm 855 € (statt 1.099) · 240 cm 995 € (statt 1.499)",
+  },
+  {
+    id: "gestell-u",
+    cat: "gestelle",
+    name: "Untergestell U-100-100",
+    sub: "Stahl · pulverbeschichtet",
+    img: "/img/prod/gestell-u.jpg",
+    price: "279",
+    material: "Stahl, schwarz",
+    extra: "Auch als Trapez 40-100 zum selben Preis",
+  },
+  {
+    id: "gestell-x",
+    cat: "gestelle",
+    name: "Stahluntergestell X-Balken",
+    sub: "Set · pulverbeschichtet",
+    img: "/img/prod/gestell-x.jpg",
+    price: "279",
+    was: "349",
+    material: "Stahl, schwarz",
+    extra: "Set — passt unter alle unsere Platten",
+  },
+  {
+    id: "beton-hocker",
+    cat: "accessoires",
+    name: "Beton-Hocker",
+    sub: "In diversen Ausführungen",
+    img: "/img/prod/beton-hocker.jpg",
+    price: "59",
+    material: "Beton",
+    extra: "Abverkauf — verschiedene Oberflächen",
+  },
+  {
+    id: "leuchte-rattan",
+    cat: "lampen",
+    name: "Hängeleuchte Rattan",
+    sub: "Geflochten · mehrere Größen",
+    img: "/img/prod/leuchte-rattan.jpg",
+    price: null,
+    material: "Rattan, geflochten",
+    extra: "Hängt bei uns über dem Esstischbereich",
+  },
 ];
 
+const LABELS: Record<string, string> = {
+  stuehle: "Stühle",
+  sofas: "Sofas",
+  tische: "Tische",
+  platten: "Tischplatten",
+  gestelle: "Gestelle",
+  accessoires: "Accessoires",
+  lampen: "Lampen",
+};
+
+/* Nur Filter zeigen, hinter denen auch etwas liegt — ein leerer Filter
+   lässt den Shop größer wirken, als er ist. */
 export const FILTERS = [
   { id: "all", label: "Alle" },
-  { id: "esstische", label: "Esstische" },
-  { id: "stuehle", label: "Stühle" },
-  { id: "sofas", label: "Sofas & Garnituren" },
-  { id: "anrichten", label: "Anrichten & Sideboards" },
-  { id: "schraenke", label: "Schränke" },
-  { id: "accessoires", label: "Accessoires" },
-  { id: "textil", label: "Teppiche & Kissen" },
-  { id: "lampen", label: "Lampen" },
+  ...Object.keys(LABELS)
+    .filter((cat) => PRODUCTS.some((p) => p.cat === cat))
+    .map((cat) => ({ id: cat, label: LABELS[cat] })),
 ];

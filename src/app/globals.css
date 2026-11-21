@@ -416,26 +416,32 @@ image-slot{
 .chip.active{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
 
 /* Grid */
-.shop-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(16px,1.6vw,26px); padding-block:clamp(40px,5vw,70px); }
-@media (max-width:1000px){ .shop-grid{ grid-template-columns:repeat(2,1fr); } }
+/* minmax(0,1fr) statt 1fr: sonst zieht eine lange Produktzeile ihre Spalte
+   breiter als die Nachbarspalten — 1fr ist minmax(auto,1fr). */
+.shop-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(16px,1.6vw,26px); padding-block:clamp(40px,5vw,70px); }
+@media (max-width:1000px){ .shop-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:620px){ .shop-grid{ grid-template-columns:1fr; } }
 
 .prod{ border:1px solid var(--line-soft); background:var(--bone); display:flex; flex-direction:column;
-  transition:opacity .5s var(--ease), transform .5s var(--ease), box-shadow .5s var(--ease); }
-.prod.hide{ display:none; }
-.prod:hover{ box-shadow:0 26px 60px -28px rgba(12,11,10,.45); }
-.prod__stage{ position:relative; aspect-ratio:1/1; overflow:hidden; perspective:1100px;
-  background:radial-gradient(120% 100% at 50% 18%, #f3eee6, #e6ddce 78%, #ddd2c0); }
-.prod__turn{ position:absolute; inset:11% 11% 16% 11%; transform-style:preserve-3d; animation:turn 9s var(--ease-soft) infinite; }
-.prod__turn .ph{ width:100%; height:100%; }
-@keyframes turn{ 0%,100%{ transform:rotateY(-9deg) translateY(0); } 50%{ transform:rotateY(9deg) translateY(-8px); } }
-.prod:nth-child(3n+2) .prod__turn{ animation-duration:11s; animation-delay:-2s; }
-.prod:nth-child(3n) .prod__turn{ animation-duration:10s; animation-delay:-4s; }
-.prod__shadow{ position:absolute; left:50%; bottom:10%; width:54%; height:5%; transform:translateX(-50%);
-  background:radial-gradient(closest-side, rgba(12,11,10,.30), transparent 75%); filter:blur(3px);
-  animation:shsh 9s var(--ease-soft) infinite; }
-@keyframes shsh{ 0%,100%{ width:54%; opacity:.85 } 50%{ width:46%; opacity:.6 } }
-.prod__cat{ position:absolute; top:14px; left:14px; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--stone); }
+  transition:box-shadow .5s var(--ease), border-color .5s var(--ease);
+  /* Gestaffelt hereinblenden. Die Animation sitzt am Element, nicht am
+     Observer: beim Filterwechsel montiert React das Raster neu (key), und
+     damit läuft sie von selbst noch einmal. */
+  animation:prod-in .8s var(--ease) both;
+  animation-delay:calc(var(--i, 0) * 60ms); }
+@keyframes prod-in{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; transform:none; } }
+.prod:hover{ box-shadow:0 26px 60px -28px rgba(12,11,10,.45); border-color:var(--line); }
+
+.prod__stage{ position:relative; aspect-ratio:1/1; overflow:hidden; background:#e0d7c8; }
+.prod__stage .ph{ position:absolute; inset:0; }
+/* Das Bild selbst zieht langsam auf — der Rahmen bleibt stehen. */
+.prod__stage img{ transition:transform 1.3s var(--ease), filter 1.3s var(--ease); }
+.prod:hover .prod__stage img{ transform:scale(1.06); filter:brightness(1.03) saturate(1.03); }
+
+.prod__flag{ position:absolute; z-index:2; top:0; left:0; padding:7px 13px;
+  font-size:10px; letter-spacing:.2em; text-transform:uppercase; font-weight:600;
+  background:var(--ink); color:var(--bone); }
+.prod__flag--quiet{ background:rgba(250,248,244,.92); color:var(--graphite); font-weight:500; }
 .prod__fav{ position:absolute; top:12px; right:12px; width:34px; height:34px; border:1px solid var(--line);
   border-radius:50%; background:rgba(250,248,244,.7); display:grid; place-items:center; color:var(--graphite);
   font-size:15px; transition:.3s var(--ease); }
@@ -446,6 +452,8 @@ image-slot{
 .prod__name{ font-family:var(--serif); font-size:clamp(20px,1.6vw,25px); font-weight:400; line-height:1.1; }
 .prod__price{ font-family:var(--serif); font-size:clamp(19px,1.5vw,24px); white-space:nowrap; }
 .prod__price small{ font-family:var(--sans); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--stone); display:block; text-align:right; margin-bottom:1px; }
+.prod__price s{ display:block; font-family:var(--sans); font-size:12px; color:var(--mist); text-align:right; margin-bottom:1px; }
+.prod__ask{ font-family:var(--sans); font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; font-style:normal; color:var(--stone); }
 .prod__sub{ font-size:13px; color:var(--stone); margin-top:2px; }
 
 .prod__swatches{ display:flex; gap:7px; margin-top:14px; align-items:center; }
@@ -743,6 +751,8 @@ image-slot{
   .hero__bg img, .ab-hero > .ph img, .ticker__track, .status--open .status__dot{ animation:none !important; }
   .par img{ animation:none !important; transform:none !important; }
   .reveal-img{ clip-path:none !important; }
+  .prod{ animation:none !important; }
+  .prod:hover .prod__stage img{ transform:none; }
 }
 
 /* ───────── Sortiment als laufende Schiene ───────── */
@@ -773,4 +783,45 @@ image-slot{
   .cat-rail{ overflow-x:auto; scroll-snap-type:x mandatory; }
   .cat-rail__track{ animation:none !important; }
   .cat-rail .cat{ scroll-snap-align:start; }
+}
+
+/* ───────── Gerade im Markt: Produkte als laufende Schiene ───────── */
+.stock{ background:var(--bone); }
+.prod-rail{
+  --rail-gap:clamp(14px,1.4vw,22px);
+  margin-top:clamp(34px,4vw,58px);
+  overflow:hidden; display:flex;
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 clamp(24px,4vw,90px),
+                     #000 calc(100% - clamp(24px,4vw,90px)), transparent 100%);
+          mask-image:linear-gradient(90deg, transparent 0, #000 clamp(24px,4vw,90px),
+                     #000 calc(100% - clamp(24px,4vw,90px)), transparent 100%);
+}
+/* Die Spur startet um eine halbe Länge versetzt und läuft zurück auf 0 —
+   so wandert sie nach rechts, entgegen der Sortiment-Schiene darüber. */
+.prod-rail__track{ display:flex; flex:none; animation:prod-run 56s linear infinite; }
+@keyframes prod-run{ from{ transform:translate3d(-50%,0,0); } to{ transform:translate3d(0,0,0); } }
+.prod-rail:hover .prod-rail__track,
+.prod-rail:focus-within .prod-rail__track{ animation-play-state:paused; }
+
+.pcard{ flex:none; width:clamp(210px,19vw,290px); margin-right:var(--rail-gap);
+  display:block; color:inherit; }
+.pcard__img{ position:relative; aspect-ratio:1/1; overflow:hidden; background:#e0d7c8; }
+.pcard__img .ph{ position:absolute; inset:0; }
+.pcard__img img{ transition:transform 1.2s var(--ease); }
+.pcard:hover .pcard__img img{ transform:scale(1.06); }
+.pcard__flag{ position:absolute; z-index:2; top:0; left:0; padding:6px 11px;
+  font-size:9.5px; letter-spacing:.2em; text-transform:uppercase; font-weight:600;
+  background:var(--ink); color:var(--bone); }
+.pcard__foot{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  padding:14px 2px 0; border-top:1px solid var(--line-soft); margin-top:14px; }
+.pcard__nm{ font-family:var(--serif); font-size:clamp(15px,1.15vw,18px); line-height:1.2; }
+.pcard__pr{ font-family:var(--serif); font-size:clamp(15px,1.15vw,18px); white-space:nowrap; text-align:right; }
+.pcard__pr s{ display:block; font-family:var(--sans); font-size:11px; color:var(--mist); }
+.pcard__pr em{ font-family:var(--sans); font-size:10px; letter-spacing:.14em;
+  text-transform:uppercase; font-style:normal; color:var(--stone); }
+
+@media (prefers-reduced-motion: reduce){
+  .prod-rail{ overflow-x:auto; scroll-snap-type:x mandatory; }
+  .prod-rail__track{ animation:none !important; transform:none !important; }
+  .pcard{ scroll-snap-align:start; }
 }

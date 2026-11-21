@@ -9,6 +9,8 @@ export function ShopGrid() {
   const [active, setActive] = useState("all");
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
+  const shown = PRODUCTS.filter((p) => active === "all" || p.cat === active);
+
   return (
     <>
       <div className="filters">
@@ -26,51 +28,54 @@ export function ShopGrid() {
       </div>
 
       <div className="wrap">
-        <div className="shop-grid">
-          {PRODUCTS.map((p) => {
-            const hidden = active !== "all" && p.cat !== active;
+        {/* key am Grid: beim Filterwechsel werden die Karten neu gemountet,
+            dadurch läuft die gestaffelte Einblendung erneut. */}
+        <div className="shop-grid" key={active}>
+          {shown.map((p, i) => {
             const isOpen = !!open[p.id];
             return (
               <article
+                className="prod"
                 key={p.id}
-                className={`prod${hidden ? " hide" : ""}`}
                 data-cat={p.cat}
+                style={{ "--i": i } as React.CSSProperties}
               >
                 <div className="prod__stage">
-                  <span className="prod__cat">{p.sub}</span>
-                  <button className="prod__fav" aria-label="Merken">
+                  <ImageSlot
+                    src={p.img}
+                    alt={`${p.name} — ${p.sub}, bei Riegel Interior`}
+                    sizes="(max-width: 620px) 92vw, (max-width: 1000px) 46vw, 31vw"
+                    priority={i < 3}
+                  />
+                  {p.was && <span className="prod__flag">Abverkauf</span>}
+                  {!p.was && p.unikat && (
+                    <span className="prod__flag prod__flag--quiet">Einzelstück</span>
+                  )}
+                  <button className="prod__fav" aria-label={`${p.name} merken`}>
                     ♡
                   </button>
-                  <div className="prod__turn">
-                    <ImageSlot
-                      label="Freigestelltes Foto (PNG, transparent)"
-                      fit="contain"
-                    />
-                  </div>
-                  <span className="prod__shadow"></span>
                 </div>
 
                 <div className="prod__body">
                   <div className="prod__row">
                     <h3 className="prod__name">{p.name}</h3>
                     <span className="prod__price">
-                      {p.from && <small>ab</small>}
-                      {p.price} €
+                      {p.price ? (
+                        <>
+                          {p.was && <s>{p.was} €</s>}
+                          {p.price} €
+                        </>
+                      ) : (
+                        <em className="prod__ask">Preis im Markt</em>
+                      )}
                     </span>
                   </div>
-                  <div className="prod__swatches">
-                    {p.colors.map((c, i) => (
-                      <span key={i} className="sw" style={{ background: c }}></span>
-                    ))}
-                    <span className="more">{p.colors.length} Ausführungen</span>
-                  </div>
+                  <p className="prod__sub">{p.sub}</p>
 
                   <button
                     className="prod__toggle"
                     aria-expanded={isOpen}
-                    onClick={() =>
-                      setOpen((o) => ({ ...o, [p.id]: !o[p.id] }))
-                    }
+                    onClick={() => setOpen((o) => ({ ...o, [p.id]: !o[p.id] }))}
                   >
                     {isOpen ? "Weniger anzeigen " : "Mehr erfahren "}
                     <span className="ic">+</span>
@@ -78,22 +83,24 @@ export function ShopGrid() {
                   <div className="prod__detail">
                     <div>
                       <dl>
-                        <div className="spec spec--maße">
-                          <dt>Maße</dt>
-                          <dd>{p.masse}</dd>
-                        </div>
-                        <div className="spec">
-                          <dt>Material</dt>
-                          <dd>{p.material}</dd>
-                        </div>
-                        <div className="spec">
-                          <dt>Ausführungen</dt>
-                          <dd>{p.cnames}</dd>
-                        </div>
-                        <div className="spec">
-                          <dt>Hinweis</dt>
-                          <dd>{p.extra}</dd>
-                        </div>
+                        {p.masse && (
+                          <div className="spec spec--maße">
+                            <dt>Maße</dt>
+                            <dd>{p.masse}</dd>
+                          </div>
+                        )}
+                        {p.material && (
+                          <div className="spec">
+                            <dt>Material</dt>
+                            <dd>{p.material}</dd>
+                          </div>
+                        )}
+                        {p.extra && (
+                          <div className="spec">
+                            <dt>Hinweis</dt>
+                            <dd>{p.extra}</dd>
+                          </div>
+                        )}
                       </dl>
                       <div className="prod__cta">
                         <Link
