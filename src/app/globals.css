@@ -403,6 +403,8 @@ image-slot{
 .shop-note{ display:flex; gap:14px; align-items:flex-start; margin-top:30px; padding:18px 22px; border:1px solid var(--line); background:var(--paper); max-width:60ch; }
 .shop-note .ico{ font-family:var(--serif); font-size:22px; line-height:1; color:var(--stone); }
 .shop-note p{ font-size:13.5px; color:var(--stone); margin:0; }
+.shop-note strong{ display:block; font-family:var(--serif); font-weight:400; font-size:17px;
+  color:var(--ink); margin-bottom:5px; }
 
 /* Filter */
 .filters{ position:sticky; top:0; z-index:50; background:rgba(250,248,244,.9);
@@ -445,10 +447,6 @@ image-slot{
   font-size:10px; letter-spacing:.2em; text-transform:uppercase; font-weight:600;
   background:var(--ink); color:var(--bone); }
 .prod__flag--quiet{ background:rgba(250,248,244,.92); color:var(--graphite); font-weight:500; }
-.prod__fav{ position:absolute; top:12px; right:12px; width:34px; height:34px; border:1px solid var(--line);
-  border-radius:50%; background:rgba(250,248,244,.7); display:grid; place-items:center; color:var(--graphite);
-  font-size:15px; transition:.3s var(--ease); }
-.prod__fav:hover{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
 
 .prod__body{ padding:22px 22px 24px; display:flex; flex-direction:column; gap:4px; }
 .prod__brand{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--mist); margin-bottom:5px; }

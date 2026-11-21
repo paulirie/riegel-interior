@@ -60,11 +60,8 @@ export function ShopGrid() {
                   />
                   {p.flag && <span className="prod__flag">{p.flag}</span>}
                   {!p.flag && p.bestell && (
-                    <span className="prod__flag prod__flag--quiet">Bestellware</span>
+                    <span className="prod__flag prod__flag--quiet">Auf Anfrage</span>
                   )}
-                  <button className="prod__fav" aria-label={`${p.name} merken`}>
-                    ♡
-                  </button>
                 </div>
 
                 <div className="prod__body">
@@ -116,7 +113,7 @@ export function ShopGrid() {
                             <dt>Steht in</dt>
                             <dd>
                               {p.loc}
-                              {p.bestell && " · auf Bestellung"}
+                              {p.bestell && " · wird im Markt bestellt"}
                             </dd>
                           </div>
                         )}
@@ -132,12 +129,12 @@ export function ShopGrid() {
                           className="btn btn--sm btn--block btn--solid"
                           href={whatsappLink(p.name, p.loc)}
                           target="_blank"
-                          rel="noopener"
+                          rel="noopener noreferrer"
                         >
                           Per WhatsApp fragen
                         </a>
                         <Link href="/standorte" className="btn btn--sm btn--block">
-                          Im Markt ansehen
+                          Weg zum Markt
                         </Link>
                       </div>
                       {p.url && (
@@ -145,7 +142,7 @@ export function ShopGrid() {
                           className="prod__ad"
                           href={p.url}
                           target="_blank"
-                          rel="noopener"
+                          rel="noopener noreferrer"
                         >
                           Anzeige mit allen Fotos ansehen <span className="arr">↗</span>
                         </a>

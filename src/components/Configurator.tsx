@@ -268,7 +268,7 @@ export function Configurator() {
             className="btn"
             style={{ borderColor: "rgba(250,248,244,.5)", color: "var(--bone)" }}
           >
-            Anfrage senden <span className="arr">→</span>
+            Im Markt besprechen <span className="arr">→</span>
           </Link>
         </div>
       </div>
