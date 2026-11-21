@@ -499,50 +499,106 @@ image-slot{
 .stage__label{ position:absolute; top:104px; left:0; right:0; text-align:center; }
 .stage__hint{ position:absolute; bottom:26px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--mist); }
 
-/* Tisch-Elevation (CSS) */
-.table-vis{ width:min(78%,520px); transform:translateY(-10px); }
-.tabletop{ position:relative; height:46px; border-radius:5px;
-  background:var(--top,#c8a878); box-shadow:0 24px 50px -18px rgba(12,11,10,.5), inset 0 2px 0 rgba(255,255,255,.25);
-  transition:background .6s var(--ease); overflow:hidden; }
-.tabletop::before{ content:""; position:absolute; inset:0;
-  background:
-    repeating-linear-gradient(90deg, rgba(0,0,0,.07) 0 2px, transparent 2px 9px),
-    repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 22px);
-  mix-blend-mode:multiply; opacity:.5; }
-.tabletop.edge-baumkante{ border-radius:5px 5px 16px 18px/5px 5px 60px 70px; }
-.tabletop.edge-baumkante::after{ content:""; position:absolute; left:-1px; right:-1px; bottom:-6px; height:14px;
-  background:var(--top,#c8a878); border-radius:0 0 50% 50%/0 0 100% 100%; filter:brightness(.92); }
-.knots{ position:absolute; inset:0; pointer-events:none; }
-.knot{ position:absolute; border-radius:50%; background:var(--knot,#2b2520); transition:background .6s var(--ease); opacity:.9; }
-.knot.k1{ width:13px; height:7px; left:24%; top:38%; }
-.knot.k2{ width:9px; height:6px; left:62%; top:55%; }
-.knot.k3{ width:7px; height:5px; left:78%; top:30%; }
+/* ----- Live-Vorschau: Werkzeichnung -----
+   Eine einzige SVG-Zeichnung in Kavalier-Schrägbild, Maßstab konstant
+   (1 cm = 2,52 Zeichnungseinheiten). Die Geometrie gehört dem Tween in
+   TablePlan.tsx; hier stehen nur Farbe, Strich und Licht. */
+/* margin-bottom hält die untere Zone frei: dort liegen Detailfenster,
+   Gestell-Fahne und der Hinweis "Darstellung schematisch". */
+.plan{ display:block; width:100%; max-width:720px; margin-inline:auto;
+  margin-bottom:clamp(64px,13vh,150px);
+  --fs:14.5; --grain-o:.34; --sheen-o:.3; --brush-o:0; }
+.plan[data-finish="brushed"]{ --grain-o:.5; --sheen-o:.13; --brush-o:.5; }
+.plan text{ font-family:var(--sans); font-weight:500; fill:var(--stone);
+  font-size:calc(var(--fs)*1px); letter-spacing:calc(var(--fs)*.12px); }
 
-.base{ position:relative; height:150px; margin:0 6%; }
-.leg{ position:absolute; background:var(--steel,#1a1a1a); transition:background .6s var(--ease); border-radius:2px; }
-/* U-Gestell */
-.form-u .leg.l, .form-u .leg.r{ width:12px; height:148px; top:0; }
-.form-u .leg.l{ left:6%; } .form-u .leg.r{ right:6%; }
-.form-u .leg.fl, .form-u .leg.fr{ width:120px; height:11px; bottom:0; }
-.form-u .leg.fl{ left:0; } .form-u .leg.fr{ right:0; }
-.form-u .leg.tl, .form-u .leg.tr{ width:120px; height:11px; top:0; }
-.form-u .leg.tl{ left:0; } .form-u .leg.tr{ right:0; }
-/* A-Gestell (schräg) */
-.form-a .leg{ display:none; }
-.form-a .leg.al, .form-a .leg.ar{ display:block; width:12px; height:172px; top:-10px; }
-.form-a .leg.al{ left:18%; transform:rotate(16deg); transform-origin:top; }
-.form-a .leg.ar{ right:18%; transform:rotate(-16deg); transform-origin:top; }
-.form-a .leg.cross{ display:block; width:46%; height:10px; left:27%; top:54%; }
-/* Spider / Mittelfuß */
-.form-spider .leg{ display:none; }
-.form-spider .leg.col{ display:block; width:24px; height:118px; left:calc(50% - 12px); top:0; }
-.form-spider .leg.foot{ display:block; width:64%; height:12px; left:18%; bottom:0; }
-.form-spider .leg.cap{ display:block; width:40%; height:11px; left:30%; top:0; }
-/* 4-Bein */
-.form-vier .leg{ display:none; }
-.form-vier .leg.v1,.form-vier .leg.v2,.form-vier .leg.v3,.form-vier .leg.v4{ display:block; width:12px; height:150px; top:0; }
-.form-vier .leg.v1{ left:8%; } .form-vier .leg.v2{ left:26%; } .form-vier .leg.v3{ right:26%; } .form-vier .leg.v4{ right:8%; }
-.steel-inox{ --steel:linear-gradient(180deg,#e9ecee,#aeb4b7 55%,#cfd3d5); }
+/* Flächen: ein Farbton, vier Ebenen. Zuerst eine einfache Füllung als
+   Rückfall, dann die abgeleitete — Browser ohne color-mix behalten die erste. */
+.plan__deck{ fill:#c8a878; fill:var(--top); transition:fill .6s var(--ease); }
+.plan__cham{ fill:#dcc39c; fill:color-mix(in oklab, var(--top) 86%, #fffdf7); transition:fill .6s var(--ease); }
+.plan__band{ fill:#a98755; fill:color-mix(in oklab, var(--top) 80%, var(--ink)); transition:fill .6s var(--ease); }
+.plan__end { fill:#95744a; fill:color-mix(in oklab, var(--top) 68%, var(--ink)); transition:fill .6s var(--ease); }
+/* pulverbeschichtet reflektiert nicht: flaches Schwarz, eine helle Kante */
+.plan__steel{ fill:#1a1a1a; stroke:rgba(250,248,244,.16); stroke-width:1; vector-effect:non-scaling-stroke; }
+
+/* Striche bleiben Haarlinien, auch wenn die Zeichnung skaliert */
+.plan__ink, .plan__ink2{ fill:none; stroke:rgba(12,11,10,.5); stroke-width:1; vector-effect:non-scaling-stroke; }
+.plan__grain{ fill:none; stroke:#6b4a28; stroke:color-mix(in oklab, var(--top) 34%, #241708);
+  stroke-width:1; vector-effect:non-scaling-stroke; stroke-opacity:var(--grain-o);
+  transition:stroke .6s var(--ease), stroke-opacity .6s var(--ease); }
+/* geschliffen gegen gebürstet: nicht Farbe, sondern Porendichte und Glanz */
+.plan__brush{ opacity:var(--brush-o); transition:opacity .6s var(--ease); }
+.plan__knot{ fill:#43301c; fill:color-mix(in oklab, var(--top) 40%, #241708);
+  opacity:.72; transition:fill .6s var(--ease); }
+.plan__dimline{ fill:none; stroke:var(--mist); stroke-width:1; vector-effect:non-scaling-stroke; }
+.plan__help{ fill:none; stroke:var(--mist); stroke-width:1; stroke-opacity:.45;
+  stroke-dasharray:4 5; vector-effect:non-scaling-stroke; }
+.plan__dim{ transition:opacity .5s var(--ease); }
+.plan__flag{ fill:var(--stone); }
+
+/* Streiflicht: die einzige Dauerbewegung. Die Ruhelage steht im Basis-
+   Transform, nicht erst im Keyframe — der globale reduced-motion-Block
+   schaltet damit die Bewegung ab, ohne den Glanz zu löschen. Verschoben
+   wird in Zentimetern, weil die Gruppe in der Deckflächen-Ebene rechnet. */
+.plan__sheen{ opacity:var(--sheen-o); transition:opacity .6s var(--ease); }
+.plan__sheenwrap{ transform:translateX(calc(var(--len,200) * .58px)); }
+.stage.is-live .plan__sheenwrap{ animation:plan-sheen 19s linear infinite; }
+@keyframes plan-sheen{
+  0%,18%{ transform:translateX(calc(var(--len,200) * -.42px)); }
+  100%  { transform:translateX(calc(var(--len,200) * 1.26px)); }
+}
+
+/* Einmalig beim ersten Sichtbarwerden: die Kontur zeichnet sich ein, dann
+   blenden die Flächen auf. Eine Zeichnung, die entsteht — passend zu
+   "Darstellung schematisch". */
+.stage.is-arm .plan__faces{ opacity:0; }
+.stage.is-arm .plan__ink{ stroke-dasharray:2400; stroke-dashoffset:2400; }
+.stage.is-seen .plan__faces{ animation:plan-fade .9s var(--ease) .35s both; }
+.stage.is-seen .plan__ink{ animation:plan-draw 1.25s var(--ease) both; }
+@keyframes plan-fade{ from{ opacity:0 } to{ opacity:1 } }
+@keyframes plan-draw{ from{ stroke-dashoffset:2400 } to{ stroke-dashoffset:0 } }
+
+/* "bis 300 × 100 cm" ist kein festes Maß: gestrichelte Kontur, blassere
+   Flächen, Fahne "nach Maß". Die Zeichnung sagt selbst, was im Panel
+   "auf Anfrage" heißt. */
+.plan[data-open="true"] .plan__ink{ stroke-dasharray:13 9; }
+.plan[data-open="true"] .plan__deck,
+.plan[data-open="true"] .plan__band,
+.plan[data-open="true"] .plan__end{ fill-opacity:.62; }
+
+/* Detailfenster: eigener Maßstab, damit 4 cm Stärke, 1,2 cm Fase und der
+   Wuchs der Baumkante überhaupt lesbar sind. */
+.detail{ position:absolute; left:clamp(16px,3vw,34px); bottom:clamp(58px,7vh,78px);
+  width:clamp(168px,21vw,248px); background:rgba(250,248,244,.86);
+  border:1px solid var(--line); padding:10px 12px 11px; }
+.detail__svg{ display:block; width:100%; height:auto; }
+.detail figcaption{ margin-top:9px; font-size:10px; line-height:1.75; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--stone); }
+.detail figcaption b{ display:block; color:var(--ink); font-weight:500; letter-spacing:.16em; }
+
+.vis-tag--base{ right:clamp(16px,3vw,34px); bottom:clamp(58px,8vh,88px); }
+
+@media (max-width:980px){
+  .stage{ padding:24px 16px; }
+  .stage__label{ top:62px; }
+  /* schmale Bühne: Zeichnung höher setzen, Detailfenster kleiner und
+     die Bildunterschrift ohne Versalien, damit sie zweizeilig bleibt */
+  .plan{ --fs:30; margin-bottom:154px; }
+  /* 38px lag auf der Hinweiszeile (bottom:26px plus 19px Zeilenhöhe) —
+     52px setzt Detailfenster und Fahne knapp darüber. */
+  .detail{ left:12px; bottom:52px; width:144px; padding:7px 8px 8px; }
+  .detail figcaption{ margin-top:6px; font-size:9px; line-height:1.5;
+    letter-spacing:.01em; text-transform:none; }
+  .detail figcaption b{ letter-spacing:.1em; text-transform:uppercase; font-size:8.5px; }
+  .vis-tag--base{ right:12px; bottom:52px; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  /* der globale Block oben setzt animation:none — dann müssen die
+     Ausgangszustände selbst stimmen, sonst bleibt die Platte unsichtbar */
+  .stage.is-arm .plan__faces{ opacity:1 !important; }
+  .stage.is-arm .plan__ink{ stroke-dasharray:none !important; stroke-dashoffset:0 !important; }
+}
 
 /* schwebende Tags */
 .vis-tag{ position:absolute; background:var(--ink); color:var(--bone); font-size:10.5px; letter-spacing:.14em;

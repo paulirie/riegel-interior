@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { TablePlan } from "./TablePlan";
 
 /* Alle Optionen und Preise hier stammen aus zwei eigenen Quellen:
  *
@@ -40,9 +41,17 @@ const FORMS = [
   { val: "X-Gestell", form: "a", price: 279 },
 ];
 
-const formKey: Record<string, string> = {
-  "U-Gestell": "u",
-  "X-Gestell": "a",
+/* Geometrie der Zeichnung. Länge steht auf den Preisschildern. Die Tiefe
+   steht nur bei "120 × 70" und "bis 300 × 100" — für 140/200/240 gibt es
+   keinen Punktwert, deshalb zeichnet die Werkzeichnung dort 85 cm (das
+   Inserat deckt 80 × 80 bis 300 × 100), zeigt aber KEINE Tiefen-Maßzahl,
+   sondern den Hinweis "Tiefe 80–100 cm nach Wahl". Erfunden wird nichts. */
+const GEO: Record<string, { len: number; dep: number; depLabel: string | null; open: boolean }> = {
+  "120 × 70 cm":      { len: 120, dep: 70,  depLabel: "70 cm",  open: false },
+  "140 cm":           { len: 140, dep: 85,  depLabel: null,     open: false },
+  "200 cm":           { len: 200, dep: 85,  depLabel: null,     open: false },
+  "240 cm":           { len: 240, dep: 85,  depLabel: null,     open: false },
+  "bis 300 × 100 cm": { len: 300, dep: 100, depLabel: "100 cm", open: true  },
 };
 
 const fmt = (n: number) => n.toLocaleString("de-DE");
@@ -63,43 +72,57 @@ export function Configurator() {
     "Eiche massiv", s.size, s.edge, s.finish, s.ton, s.form + " · Stahl schwarz",
   ].join(" · ");
 
-  const topStyle = { "--top": s.tone, "--knot": "#8a6a45" } as CSSProperties;
-  /* Die Gestelle gibt es schwarz pulverbeschichtet — mehr führt kein Schild. */
-  const baseStyle = { "--steel": "#1a1a1a" } as CSSProperties;
+  const g = GEO[s.size];
+  const vec = {
+    len: g.len,
+    dep: g.dep,
+    raw: s.edge === "Baumkante" ? 1 : 0,
+    swiss: s.edge === "Schweizer Kante" ? 1 : 0,
+    frm: s.form === "X-Gestell" ? 1 : 0,
+  };
+
+  /* is-arm schaltet die Ausgangslage der Einmal-Animation, is-seen startet
+     sie, is-live hält das Streiflicht nur, solange die Bühne im Bild ist. */
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [cls, setCls] = useState("");
+  useEffect(() => {
+    setCls("is-arm");
+    const node = stageRef.current;
+    if (!node) return;
+    const io = new IntersectionObserver(
+      (es) =>
+        setCls((prev) => {
+          const seen = prev.includes("is-seen") || es[0].isIntersecting;
+          return ["is-arm", seen && "is-seen", es[0].isIntersecting && "is-live"]
+            .filter(Boolean).join(" ");
+        }),
+      { threshold: 0.04 }
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <>
       {/* ── LIVE-VORSCHAU ── */}
-      <div className="stage">
+      <div ref={stageRef} className={`stage ${cls}`}>
         <div className="stage__label">
           <p className="eyebrow">Eiche massiv · {s.edge} · {s.size}</p>
+          {g.depLabel === null && (
+            <p className="eyebrow" style={{ marginTop: 6, letterSpacing: ".2em", opacity: .62 }}>
+              Tiefe 80–100 cm nach Wahl
+            </p>
+          )}
         </div>
-        <span className="vis-tag" style={{ top: "30%", left: "8%" }}>
-          {s.finish} · {s.ton}
-        </span>
-        <span className="vis-tag" style={{ bottom: "24%", right: "8%" }}>
-          {s.form} · Stahl schwarz
-        </span>
-        <div className="table-vis">
-          <div
-            className={`tabletop${s.edge === "Baumkante" ? " edge-baumkante" : ""}`}
-            style={topStyle}
-          >
-            <div className="knots">
-              <span className="knot k1"></span>
-              <span className="knot k2"></span>
-              <span className="knot k3"></span>
-            </div>
-          </div>
-          <div className={`base form-${formKey[s.form]}`} style={baseStyle}>
-            <span className="leg tl"></span><span className="leg tr"></span>
-            <span className="leg l"></span><span className="leg r"></span>
-            <span className="leg fl"></span><span className="leg fr"></span>
-            <span className="leg al"></span><span className="leg ar"></span><span className="leg cross"></span>
-            <span className="leg col"></span><span className="leg foot"></span><span className="leg cap"></span>
-            <span className="leg v1"></span><span className="leg v2"></span><span className="leg v3"></span><span className="leg v4"></span>
-          </div>
-        </div>
+        <TablePlan
+          v={vec}
+          open={g.open}
+          finish={s.finish}
+          tone={s.tone}
+          edge={s.edge}
+          depLabel={g.depLabel}
+        />
+        <span className="vis-tag vis-tag--base">{s.form} · Stahl schwarz</span>
         <p className="stage__hint">Live-Vorschau · Darstellung schematisch</p>
       </div>
 
