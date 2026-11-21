@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ImageSlot } from "@/components/ImageSlot";
 import { ManufakturVideo } from "@/components/ManufakturVideo";
+import { Ticker } from "@/components/Ticker";
+import { CountUp } from "@/components/CountUp";
 
 const CATS = [
   { slot: "Esstische", nm: "Esstische", ct: "Eiche · Suar · Teak", img: "/img/kat-esstische.jpg" },
@@ -20,6 +22,11 @@ const INSTA = [
   { src: "/img/detail-platten.jpg", alt: "Eichen-Tischplatten in mehreren Größen" },
   { src: "/img/detail-sofa-gruen.jpg", alt: "Ecksofa im Showroom mit Wurzelholz-Couchtisch" },
   { src: "/img/detail-kante-2.jpg", alt: "Detail: helle Eichenkante mit Baumkante" },
+];
+
+const TICKER = [
+  "Eiche", "~Suar", "Teak", "~Akazie", "Baumkante", "~Schweizer Schliff",
+  "Naturgeölt", "~Unikate aus aller Welt", "Eigene Manufaktur",
 ];
 
 const WOODS = [
@@ -77,6 +84,8 @@ export default function Home() {
         </div>
       </section>
 
+      <Ticker items={TICKER} />
+
       {/* ── PHILOSOPHIE ── */}
       <section className="section philo">
         <div className="wrap">
@@ -85,12 +94,13 @@ export default function Home() {
               <p className="eyebrow">01 — Unsere Philosophie</p>
               <div className="figures">
                 <div className="fig">
-                  <div className="num">3</div>
+                  <div className="num"><CountUp to={3} /></div>
                   <div className="cap">Standorte in NRW</div>
                 </div>
                 <div className="fig">
                   <div className="num">
-                    6.000<span style={{ fontSize: ".4em" }}>m²</span>
+                    <CountUp to={6000} />
+                    <span style={{ fontSize: ".4em" }}>m²</span>
                   </div>
                   <div className="cap">Flagship Wesel</div>
                 </div>
@@ -213,8 +223,9 @@ export default function Home() {
                 Jetzt konfigurieren <span className="arr">→</span>
               </Link>
             </div>
-            <div className="mix__visual" data-reveal="" data-reveal-delay="2">
+            <div className="mix__visual par" data-reveal="" data-reveal-delay="2">
               <ImageSlot
+                className="reveal-img"
                 src="/img/mix-platte-gestell.jpg"
                 alt="Stahlgestelle und massive Eichen-Tischplatten in der Ausstellung"
                 sizes="(max-width: 900px) 100vw, 45vw"
@@ -261,7 +272,7 @@ export default function Home() {
           </div>
           <div className="loc-grid">
             <Link href="/standorte" className="loc loc--hero" data-reveal="">
-              <div className="loc__img">
+              <div className="loc__img par">
                 <ImageSlot
                   src="/img/standort-wesel.jpg"
                   alt="Flagship-Store Wesel in den ehemaligen Trapp-Hallen"
@@ -275,7 +286,7 @@ export default function Home() {
               </div>
             </Link>
             <Link href="/standorte" className="loc" data-reveal="" data-reveal-delay="1">
-              <div className="loc__img">
+              <div className="loc__img par">
                 <ImageSlot
                   src="/img/standort-recklinghausen.jpg"
                   alt="Riegel Interior im Palais Vest in Recklinghausen"
@@ -288,7 +299,7 @@ export default function Home() {
               </div>
             </Link>
             <Link href="/standorte" className="loc" data-reveal="" data-reveal-delay="2">
-              <div className="loc__img">
+              <div className="loc__img par">
                 {/* TODO: echtes Foto aus Haltern am See — aktuell Platzhalter aus dem Bildarchiv */}
                 <ImageSlot
                   src="/img/standort-haltern.jpg"
@@ -309,8 +320,9 @@ export default function Home() {
       <section className="section about">
         <div className="wrap">
           <div className="about__grid">
-            <div className="about__media" data-reveal="">
+            <div className="about__media par par--deep" data-reveal="">
               <ImageSlot
+                className="reveal-img"
                 src="/img/about-showroom.jpg"
                 alt="Blick durch den Showroom von Riegel Interior"
                 sizes="(max-width: 900px) 100vw, 45vw"

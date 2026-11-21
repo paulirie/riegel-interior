@@ -57,7 +57,7 @@ export default function UeberUnsPage() {
 
       {/* STORY 1 */}
       <section className="story">
-        <div className="story__media">
+        <div className="story__media par par--deep">
           <ImageSlot
             src="/img/ueber-uns-story.jpg"
             alt="Suar-Tisch aus einem Baumstamm-Unikat in der historischen Halle in Wesel"
@@ -85,7 +85,7 @@ export default function UeberUnsPage() {
 
       {/* STORY 2 */}
       <section className="story story--flip">
-        <div className="story__media">
+        <div className="story__media par par--deep">
           <ImageSlot
             src="/img/holz-eiche-platten.jpg"
             alt="Eichen-Tischplatten in der Manufaktur, bereit zum Ölen"

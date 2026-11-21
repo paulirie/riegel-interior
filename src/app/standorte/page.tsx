@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ImageSlot } from "@/components/ImageSlot";
+import { OpenStatus, type Opening } from "@/components/OpenStatus";
 
 export const metadata: Metadata = {
   title: "Standorte",
   description:
     "Riegel Interior in NRW: Flagship-Store Wesel, Recklinghausen und Haltern am See. Adressen, Öffnungszeiten und Highlights.",
+};
+
+/* 0 = Sonntag … 6 = Samstag */
+const HOURS: Record<string, Opening[]> = {
+  wesel:   [{ days: [1, 2, 3, 4, 5], from: 12, to: 19 }, { days: [6], from: 10, to: 15 }],
+  reck:    [{ days: [1, 2, 3, 4, 5, 6], from: 11, to: 19 }],
+  haltern: [{ days: [1, 2, 3, 4, 5], from: 12, to: 19 }, { days: [6], from: 10, to: 15 }],
 };
 
 const darkBtn = { borderColor: "rgba(250,248,244,.5)", color: "var(--bone)" };
@@ -30,7 +38,7 @@ export default function StandortePage() {
       {/* FLAGSHIP WESEL */}
       <section className="flagship">
         <div className="flagship__grid">
-          <div className="flagship__media">
+          <div className="flagship__media par par--deep">
             <ImageSlot
               src="/img/standort-wesel-2.jpg"
               alt="Flagship-Store Wesel: Showroom in den ehemaligen Trapp-Hallen"
@@ -62,7 +70,9 @@ export default function StandortePage() {
               </div>
               <div>
                 <div className="lab">Öffnungszeiten</div>
-                <div className="v">Mo–Fr 12–19 Uhr<br />Sa 10–15 Uhr</div>
+                <div className="v">Mo–Fr 12–19 Uhr<br />Sa 10–15 Uhr<br />
+                  <OpenStatus hours={HOURS.wesel} />
+                </div>
               </div>
               <div>
                 <div className="lab">Fläche</div>
@@ -99,7 +109,7 @@ export default function StandortePage() {
           <div className="loc-cards">
             {/* Recklinghausen */}
             <article className="lc" data-reveal="">
-              <div className="lc__media">
+              <div className="lc__media par">
                 <ImageSlot
                   src="/img/standort-recklinghausen-2.jpg"
                   alt="Verkaufsfläche von Riegel Interior im Palais Vest Recklinghausen"
@@ -128,7 +138,9 @@ export default function StandortePage() {
                   </div>
                   <div>
                     <div className="lab">Öffnungszeiten</div>
-                    <div className="v">Mo–Sa 11–19 Uhr</div>
+                    <div className="v">Mo–Sa 11–19 Uhr<br />
+                      <OpenStatus hours={HOURS.reck} />
+                    </div>
                   </div>
                   <div>
                     <div className="lab">Highlights</div>
@@ -155,7 +167,7 @@ export default function StandortePage() {
 
             {/* Haltern */}
             <article className="lc" data-reveal="" data-reveal-delay="1">
-              <div className="lc__media">
+              <div className="lc__media par">
                 {/* TODO: echtes Foto aus Haltern am See — aktuell Platzhalter aus dem Bildarchiv */}
                 <ImageSlot
                   src="/img/standort-haltern.jpg"
@@ -185,7 +197,9 @@ export default function StandortePage() {
                   </div>
                   <div>
                     <div className="lab">Öffnungszeiten</div>
-                    <div className="v">Mo–Fr 12–19 Uhr<br />Sa 10–15 Uhr</div>
+                    <div className="v">Mo–Fr 12–19 Uhr<br />Sa 10–15 Uhr<br />
+                      <OpenStatus hours={HOURS.haltern} />
+                    </div>
                   </div>
                   <div>
                     <div className="lab">Fläche</div>

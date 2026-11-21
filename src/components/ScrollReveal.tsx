@@ -13,7 +13,7 @@ export function ScrollReveal() {
 
   useEffect(() => {
     const els = document.querySelectorAll<HTMLElement>(
-      "[data-reveal], .reveal-lines"
+      "[data-reveal], .reveal-lines, .reveal-img"
     );
 
     const reduce = window.matchMedia(
