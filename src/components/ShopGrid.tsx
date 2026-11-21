@@ -119,6 +119,16 @@ export function ShopGrid() {
                           Im Markt ansehen
                         </Link>
                       </div>
+                      {p.url && (
+                        <a
+                          className="prod__ad"
+                          href={p.url}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          Anzeige mit allen Fotos ansehen <span className="arr">↗</span>
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
