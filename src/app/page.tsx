@@ -119,8 +119,8 @@ export default function Home() {
             <div data-reveal="" data-reveal-delay="2">
               <p className="philo__statement">
                 Wir bringen <em>außergewöhnliche</em> Stücke aus aller Welt nach
-                Hause — Massivholz aus Indonesien, Asien und Europa. Vieles davon
-                aus Insolvenzen und Sonderposten. <em>Daher die Preise.</em>
+                Hause — Massivholz aus Asien und Europa. Vieles davon aus Rest-
+                und Sonderposten. <em>Daher die Preise.</em>
               </p>
               <Link href="/ueber-uns" className="link mt-l">
                 Unsere Geschichte <span className="arr">→</span>

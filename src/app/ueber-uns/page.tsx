@@ -75,9 +75,9 @@ export default function UeberUnsPage() {
               Interior bis heute.
             </p>
             <p>
-              Bis heute geht die Suche um die ganze Welt: Massivholz aus Indonesien
-              und Asien, charaktervolle Hölzer aus Europa — immer mit dem Blick fürs
-              Besondere.
+              Bis heute geht die Suche um die ganze Welt: Massivholz aus Asien,
+              charaktervolle Hölzer aus Europa — vieles davon aus Rest- und
+              Sonderposten, daher die Preise.
             </p>
           </div>
         </div>
