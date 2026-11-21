@@ -5,14 +5,14 @@ import { ImageSlot } from "@/components/ImageSlot";
 export const metadata: Metadata = {
   title: "Über uns",
   description:
-    "Ein Familienbetrieb in zweiter Generation: die Geschichte von Riegel Interior, unsere Manufaktur und unsere Philosophie.",
+    "Ein Familienbetrieb in dritter Generation: die Geschichte von Riegel Interior, unsere Märkte und unsere Philosophie.",
 };
 
 const VALUES = [
   { n: "01", h: "Einzigartig", p: "Möbel aus aller Welt, die du so nicht überall findest — viele davon Unikate." },
   { n: "02", h: "Hochwertig", p: "Echtes Massivholz, sorgfältig ausgewählt und verarbeitet. Kein Furnier-Schein." },
   { n: "03", h: "Faire Preise", p: "Geschickter Einkauf gibt uns Spielraum — den wir an dich weitergeben." },
-  { n: "04", h: "Zertifiziert", p: "Tropische Hölzer aus zertifiziertem Anbau — vom Ursprung bis zu dir nach Hause." },
+  { n: "04", h: "Günstig eingekauft", p: "Neue Möbel aus Insolvenzen, Sonder- und Restposten — deshalb die Preise." },
 ];
 
 const GENS = [
@@ -28,7 +28,7 @@ export default function UeberUnsPage() {
       <section className="ab-hero">
         <ImageSlot
           src="/img/holz-suar-platten.jpg"
-          alt="Massive Suar-Platten an der Wand der Manufaktur"
+          alt="Massive Suar-Platten an der Wand im Showroom"
           dark
           priority
           sizes="100vw"
@@ -88,19 +88,19 @@ export default function UeberUnsPage() {
         <div className="story__media par par--deep">
           <ImageSlot
             src="/img/holz-eiche-platten.jpg"
-            alt="Eichen-Tischplatten in der Manufaktur, bereit zum Ölen"
+            alt="Eichen-Tischplatten in mehreren Größen im Markt"
             sizes="(max-width: 900px) 100vw, 50vw"
           />
         </div>
         <div className="story__body dark" style={{ background: "var(--ink)" }}>
-          <p className="eyebrow" data-reveal="">Eigene Manufaktur</p>
-          <h2 className="mt-s" data-reveal="" data-reveal-delay="1">Veredelt von Hand.</h2>
+          <p className="eyebrow" data-reveal="">Tische nach Maß</p>
+          <h2 className="mt-s" data-reveal="" data-reveal-delay="1">Selbst zusammengestellt.</h2>
           <div className="flow mt-m measure" data-reveal="" data-reveal-delay="2">
             <p>
-              Viele Tische entstehen in der eigenen Manufaktur: gehobelt,
-              geschliffen, geölt. Baumkante oder Schweizer Schliff, naturbelassen
-              oder farbig — und die Spachtelung der Astlöcher genau so, wie du sie
-              dir wünschst.
+              Bei den Esstischen suchst du dir alles selbst aus: die vollmassive
+              Eichenplatte, die Kante — Baumkante, Schweizer Kante oder gerade —,
+              die Oberfläche geschliffen oder gebürstet, dazu eine farbliche
+              Behandlung aus über zehn Tönen und das passende Gestell.
             </p>
             <p>So wird aus einem Stück Holz ein Möbel, das es nur einmal gibt. Deins.</p>
           </div>

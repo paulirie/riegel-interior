@@ -29,9 +29,9 @@ export default function StandortePage() {
             Besuch uns<br />vor Ort.
           </h1>
           <p className="lead" data-reveal="" data-reveal-delay="2">
-            Drei Häuser im Herzen des Ruhrgebiets und am Niederrhein. Jedes mit
-            eigenem Charakter — und einem wechselnden Sortiment, das immer wieder
-            überrascht.
+            Zwei Möbelhäuser und ein Lagerverkauf, am Niederrhein und im
+            Ruhrgebiet. Jedes mit eigenem Charakter — und einem wechselnden
+            Sortiment, das immer wieder überrascht.
           </p>
         </div>
       </section>
@@ -52,9 +52,9 @@ export default function StandortePage() {
             <p className="eyebrow" data-reveal="">Unser größtes Haus</p>
             <h2 data-reveal="" data-reveal-delay="1">Wesel</h2>
             <p className="mt-s measure" data-reveal="" data-reveal-delay="2">
-              Über 6.000 m² in den ehemaligen Trapp-Hallen: rohe Wände, hohe
-              Decken, große Fenster — Industriecharme, der perfekt zu unseren
-              Möbeln passt.
+              3.000 m² in den ehemaligen Werkshallen der Firma Trapp: rohe
+              Wände, hohe Decken, große Fenster — Industriecharme, der perfekt zu
+              unseren Möbeln passt.
             </p>
             <div className="info" data-reveal="" data-reveal-delay="2">
               <div>
@@ -77,11 +77,11 @@ export default function StandortePage() {
               </div>
               <div>
                 <div className="lab">Fläche</div>
-                <div className="v">über 6.000 m²</div>
+                <div className="v">3.000 m²</div>
               </div>
             </div>
             <ul className="hl" data-reveal="">
-              <li>Massivholz-Manufaktur</li>
+              <li>Tische nach Maß</li>
               <li>Wohnen &amp; Esszimmer</li>
               <li>Schlafen</li>
               <li>Accessoires</li>
@@ -183,8 +183,8 @@ export default function StandortePage() {
                 <p className="eyebrow">Am See</p>
                 <h3>Haltern am See</h3>
                 <p className="mt-s" style={{ fontSize: "14.5px" }}>
-                  Auf rund 1.000 m² und barrierefrei: maßgefertigte Eichentische
-                  sind hier das Herzstück der Ausstellung.
+                  1.000 m², barrierefrei: Tische und Stühle, ganze
+                  Wohnzimmer-Serien und ausgefallene Teakmöbel.
                 </p>
                 <div className="info">
                   <div>
@@ -211,9 +211,9 @@ export default function StandortePage() {
                   </div>
                 </div>
                 <ul className="hl">
-                  <li>Maßtische Eiche</li>
-                  <li>Sofas</li>
-                  <li>Accessoires</li>
+                  <li>Wohnzimmer-Serien</li>
+                  <li>Teakmöbel</li>
+                  <li>Tische &amp; Stühle</li>
                 </ul>
                 <div className="lc__cta">
                   <a

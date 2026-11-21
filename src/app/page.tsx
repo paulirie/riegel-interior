@@ -13,7 +13,7 @@ const CATS = [
   { slot: "Sofas & Garnituren", nm: "Sofas & Garnituren", ct: "Wohnen", img: "/img/kat-sofas.jpg" },
   { slot: "Anrichten & Sideboards", nm: "Anrichten & Sideboards", ct: "Serien", img: "/img/kat-anrichten.jpg" },
   { slot: "Schränke", nm: "Schränke", ct: "Massivholz", img: "/img/kat-schraenke.jpg" },
-  { slot: "Accessoires", nm: "Accessoires", ct: "Teak · Treibholz", img: "/img/kat-accessoires.jpg" },
+  { slot: "Accessoires", nm: "Accessoires", ct: "Teak · Wurzelholz", img: "/img/kat-accessoires.jpg" },
   { slot: "Teppiche & Kissen", nm: "Teppiche & Kissen", ct: "Textil", img: "/img/kat-textil.jpg" },
   { slot: "Lampen & Leuchten", nm: "Lampen", ct: "Teak · Naturholz", img: "/img/kat-lampen.jpg" },
 ];
@@ -27,16 +27,19 @@ const INSTA = [
   { src: "/img/detail-kante-2.jpg", alt: "Detail: helle Eichenkante mit Baumkante" },
 ];
 
+/* Nur Hölzer und Begriffe, die in den eigenen Inseraten wirklich vorkommen.
+   "Akazie" und "Treibholz" standen hier, obwohl keine einzige der 196 Anzeigen
+   sie nennt; "Schweizer Schliff" heißt bei uns "Schweizer Kante". */
 const TICKER = [
-  "Eiche", "~Suar", "Teak", "~Akazie", "Baumkante", "~Schweizer Schliff",
-  "Naturgeölt", "~Unikate aus aller Welt", "Eigene Manufaktur",
+  "Teak", "~Eiche", "Suar", "~Mango", "Baumkante", "~Schweizer Kante",
+  "Baumscheiben", "~Unikate aus aller Welt", "Tische nach Maß",
 ];
 
 const WOODS = [
-  { h: "Eiche", p: "Unser Herzstück. Verschiedene Kanten und Maserungen, von 1,20 m bis 3,00 m." },
-  { h: "Suar", p: "Tropisches Hartholz mit lebendiger Maserung — jedes Stück ein Unikat." },
-  { h: "Teak", p: "Warm und robust. Auch für Accessoires, Raumteiler und Leuchten." },
-  { h: "Akazie", p: "Charaktervolle Optik zu fairen Konditionen — zertifiziert bezogen." },
+  { h: "Teak", p: "Unser größtes Sortiment. Schränke, Sideboards, Regale — und geschnitzte Einzelstücke." },
+  { h: "Eiche", p: "Tischplatten nach Maß, von 80 × 80 bis 300 × 100 cm. Schweizer Kante, gerade Kante oder Baumkante." },
+  { h: "Suar", p: "Tropisches Hartholz, bei uns als Baumscheibe und Monolith — jedes Stück ein Unikat." },
+  { h: "Mango", p: "Esstische, Couchtische und Sideboards. Lebendig gemasert, oft dunkel gebeizt." },
 ];
 
 export default function Home() {
@@ -59,7 +62,7 @@ export default function Home() {
         </div>
         <div className="hero__inner">
           <p className="eyebrow hero__eyebrow" data-reveal="" data-reveal-delay="1">
-            Möbel aus aller Welt · seit zwei Generationen
+            Möbel aus aller Welt · seit drei Generationen
           </p>
           <h1 className="reveal-lines">
             <span><i>Einzigartige</i></span>
@@ -69,7 +72,7 @@ export default function Home() {
           <div className="hero__sub" data-reveal="" data-reveal-delay="3">
             <p className="lead">
               Massivholz mit Charakter — in hoher Qualität, zu richtig attraktiven
-              Preisen. In der eigenen Manufaktur veredelt.
+              Preisen. Vieles davon Einzelstücke.
             </p>
             <div className="hero__cta">
               <Link href="/shop" className="btn">
@@ -102,13 +105,13 @@ export default function Home() {
                 </div>
                 <div className="fig">
                   <div className="num">
-                    <CountUp to={6000} />
+                    <CountUp to={3000} />
                     <span style={{ fontSize: ".4em" }}>m²</span>
                   </div>
                   <div className="cap">Flagship Wesel</div>
                 </div>
                 <div className="fig">
-                  <div className="num">2.</div>
+                  <div className="num">3.</div>
                   <div className="cap">Generation Familie</div>
                 </div>
               </div>
@@ -116,8 +119,8 @@ export default function Home() {
             <div data-reveal="" data-reveal-delay="2">
               <p className="philo__statement">
                 Wir bringen <em>außergewöhnliche</em> Stücke aus aller Welt nach
-                Hause — Massivholz aus Indonesien, Asien und Europa. Hohe Qualität,
-                zertifizierte Hölzer, ehrliche Preise. <em>So einfach ist das.</em>
+                Hause — Massivholz aus Indonesien, Asien und Europa. Vieles davon
+                aus Insolvenzen und Sonderposten. <em>Daher die Preise.</em>
               </p>
               <Link href="/ueber-uns" className="link mt-l">
                 Unsere Geschichte <span className="arr">→</span>
@@ -133,17 +136,17 @@ export default function Home() {
           <ManufakturVideo />
         </div>
         <div className="split__body dark" style={{ background: "var(--ink)" }}>
-          <p className="eyebrow" data-reveal="">02 — Eigene Manufaktur</p>
+          <p className="eyebrow" data-reveal="">02 — Tische nach Maß</p>
           <blockquote className="quote mt-m" data-reveal="" data-reveal-delay="1">
             „Ein Tisch ist kein Möbelstück. Er ist Treffpunkt. Mittelpunkt. Bühne
             für das Leben.“
             <span className="src">— Riegel Interior</span>
           </blockquote>
           <p className="mt-m measure" data-reveal="" data-reveal-delay="2">
-            Unsere Esstische aus echter Eiche, Suar und Teak werden bei uns
-            aufbereitet: Baumkante oder Schweizer Schliff, naturbelassen oder
-            farbig geölt, mit der Spachtelung deiner Wahl. Tische fürs Leben —
-            gebaut, um Geschichten zu erzählen.
+            In Wesel stellst du dir deinen Esstisch selbst zusammen: vollmassive
+            Eichenplatten von 80 × 80 bis 300 × 100 cm, mit Baumkante, Schweizer
+            Kante oder gerader Kante, geschliffen oder gebürstet. Dazu das
+            Gestell deiner Wahl — über 5.000 Kombinationen.
           </p>
           <Link href="/konfigurator" className="link mt-l" data-reveal="" data-reveal-delay="3">
             Tisch konfigurieren <span className="arr">→</span>
@@ -178,26 +181,26 @@ export default function Home() {
                 Dein Tisch.<br />Deine Entscheidung.
               </h2>
               <p className="mt-m measure" data-reveal="" data-reveal-delay="2">
-                Stell dir deinen Massivholztisch Schritt für Schritt zusammen — von
-                der Platte bis zur Spachtelung. Modular, in unserer Manufaktur
-                gefertigt.
+                Stell dir deinen Esstisch Schritt für Schritt zusammen — Platte,
+                Kante, Oberfläche, Gestell. Über 5.000 Kombinationen, alle aus
+                vollmassiver Eiche.
               </p>
               <div className="mix__steps">
                 <div className="mix__step" data-reveal="">
                   <span className="n">01</span>
-                  <div><span className="t">Tischplatte</span><div className="d">Eiche, Suar oder Teak — in deiner Wunschgröße</div></div>
+                  <div><span className="t">Tischplatte</span><div className="d">Vollmassive Eiche, 80 × 80 bis 300 × 100 cm</div></div>
                 </div>
                 <div className="mix__step" data-reveal="">
                   <span className="n">02</span>
-                  <div><span className="t">Ölung &amp; Finish</span><div className="d">Naturbelassen oder farbig geölt</div></div>
+                  <div><span className="t">Kante</span><div className="d">Baumkante, Schweizer Kante oder gerade</div></div>
                 </div>
                 <div className="mix__step" data-reveal="">
                   <span className="n">03</span>
-                  <div><span className="t">Tischgestell</span><div className="d">Stahl in mehreren Formen &amp; Farben</div></div>
+                  <div><span className="t">Oberfläche</span><div className="d">Geschliffen oder gebürstet, über 10 Farbtöne</div></div>
                 </div>
                 <div className="mix__step" data-reveal="">
                   <span className="n">04</span>
-                  <div><span className="t">Spachtelung</span><div className="d">Astlöcher in der Farbe deiner Wahl</div></div>
+                  <div><span className="t">Tischgestell</span><div className="d">Stahl schwarz — U, Trapez oder X-Balken</div></div>
                 </div>
               </div>
               <Link href="/konfigurator" className="btn mt-l" data-reveal="">
@@ -283,7 +286,7 @@ export default function Home() {
                 <span className="loc__tag">Flagship</span>
                 <div className="loc__cap">
                   <div className="nm">Wesel</div>
-                  <div className="meta">Über 6.000 m² · ehemalige Trapp-Hallen</div>
+                  <div className="meta">3.000 m² · ehemalige Werkshallen der Firma Trapp</div>
                 </div>
               </div>
             </Link>
@@ -332,11 +335,11 @@ export default function Home() {
             <div>
               <p className="eyebrow" data-reveal="">08 — Familie</p>
               <h2 className="mt-s" data-reveal="" data-reveal-delay="1">
-                Ein Familien&shy;betrieb<br />in zweiter Generation.
+                Ein Familien&shy;betrieb<br />in dritter Generation.
               </h2>
               <p className="mt-m measure" data-reveal="" data-reveal-delay="2">
-                Was vor zwei Generationen begann, führt die Familie Riegel bis
-                heute mit derselben Leidenschaft weiter — inzwischen in dritter
+                Was der Großvater begann, führt die Familie Riegel bis heute
+                mit derselben Leidenschaft weiter — inzwischen in dritter
                 Generation. Weil gute Möbel Familiensache sind.
               </p>
               <Link href="/ueber-uns" className="link mt-l" data-reveal="" data-reveal-delay="3">

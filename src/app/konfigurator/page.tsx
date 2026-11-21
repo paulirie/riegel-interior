@@ -4,7 +4,7 @@ import { Configurator } from "@/components/Configurator";
 export const metadata: Metadata = {
   title: "Mix & Match — Tisch konfigurieren",
   description:
-    "Stell dir deinen Massivholztisch zusammen: Platte, Ölung, Gestell und Spachtelung. Riegel Interior Manufaktur.",
+    "Stell dir deinen Esstisch aus vollmassiver Eiche zusammen: Platte, Kante, Oberfläche und Gestell. Riegel Interior.",
 };
 
 export default function KonfiguratorPage() {
