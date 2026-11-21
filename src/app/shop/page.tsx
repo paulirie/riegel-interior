@@ -29,6 +29,9 @@ export default function ShopPage() {
                 Märkten steht mehr, als je online landet. Frag kurz nach, ob ein
                 Stück noch da ist — oder schau einfach vorbei.
               </p>
+              <p className="shop-note__stand">
+                Preise und Verfügbarkeit: Stand 21. November 2026
+              </p>
             </div>
           </div>
         </div>

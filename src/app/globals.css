@@ -403,6 +403,7 @@ image-slot{
 .shop-note{ display:flex; gap:14px; align-items:flex-start; margin-top:30px; padding:18px 22px; border:1px solid var(--line); background:var(--paper); max-width:60ch; }
 .shop-note .ico{ font-family:var(--serif); font-size:22px; line-height:1; color:var(--stone); }
 .shop-note p{ font-size:13.5px; color:var(--stone); margin:0; }
+.shop-note__stand{ font-size:11px; letter-spacing:.08em; color:var(--mist); margin-top:9px; }
 .shop-note strong{ display:block; font-family:var(--serif); font-weight:400; font-size:17px;
   color:var(--ink); margin-bottom:5px; }
 

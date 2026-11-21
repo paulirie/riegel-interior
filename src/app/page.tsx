@@ -8,14 +8,14 @@ import { ProductRail } from "@/components/ProductRail";
 import { PRODUCTS } from "@/data/site";
 
 const CATS = [
-  { slot: "Esstische", nm: "Esstische", ct: "Eiche · Suar · Teak", img: "/img/kat-esstische.jpg" },
+  { slot: "Esstische", nm: "Esstische", ct: "Suar · Eiche · Teak · Mango", img: "/img/kat-esstische.jpg" },
   { slot: "Stühle", nm: "Stühle", ct: "Esszimmer", img: "/img/kat-stuehle.jpg" },
-  { slot: "Sofas & Garnituren", nm: "Sofas & Garnituren", ct: "Wohnen", img: "/img/kat-sofas.jpg" },
+  { slot: "Sofas & Ecksofas", nm: "Sofas & Ecksofas", ct: "Wohnen", img: "/img/kat-sofas.jpg" },
   { slot: "Anrichten & Sideboards", nm: "Anrichten & Sideboards", ct: "Serien", img: "/img/kat-anrichten.jpg" },
-  { slot: "Schränke", nm: "Schränke", ct: "Massivholz", img: "/img/kat-schraenke.jpg" },
+  { slot: "Schränke", nm: "Schränke", ct: "Teak · Mango", img: "/img/kat-schraenke.jpg" },
   { slot: "Accessoires", nm: "Accessoires", ct: "Teak · Wurzelholz", img: "/img/kat-accessoires.jpg" },
-  { slot: "Teppiche & Kissen", nm: "Teppiche & Kissen", ct: "Textil", img: "/img/kat-textil.jpg" },
-  { slot: "Lampen & Leuchten", nm: "Lampen", ct: "Teak · Naturholz", img: "/img/kat-lampen.jpg" },
+  { slot: "Stoffe & Bezüge", nm: "Stoffe & Bezüge", ct: "Webstoff · Cord · Samt", img: "/img/kat-textil.jpg" },
+  { slot: "Lampen & Leuchten", nm: "Lampen", ct: "Teak · Holz & Metall", img: "/img/kat-lampen.jpg" },
 ];
 
 const INSTA = [
@@ -76,7 +76,7 @@ export default function Home() {
             </p>
             <div className="hero__cta">
               <Link href="/shop" className="btn">
-                Shop entdecken <span className="arr">→</span>
+                Sortiment entdecken <span className="arr">→</span>
               </Link>
               <Link href="/standorte" className="btn">
                 Standorte
@@ -215,10 +215,10 @@ export default function Home() {
                 sizes="(max-width: 900px) 100vw, 45vw"
               />
               <span className="mix__tagfloat" style={{ top: "8%", left: "-6%" }}>
-                Eiche · Baumkante
+                Eiche · Schweizer Kante
               </span>
               <span className="mix__tagfloat" style={{ bottom: "14%", right: "-6%" }}>
-                Gestell · Schwarz matt
+                Gestell · Stahl schwarz
               </span>
             </div>
           </div>
@@ -232,7 +232,7 @@ export default function Home() {
             <div data-reveal="">
               <p className="eyebrow">05 — Gerade im Markt</p>
               <h2 className="mt-s">
-                Steht bei uns.<br />Heute noch.
+                Steht bei uns.<br />Sofort verfügbar.
               </h2>
             </div>
             <Link href="/shop" className="link" data-reveal="" data-reveal-delay="2">

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 const VALUES = [
   { n: "01", h: "Einzigartig", p: "Möbel aus aller Welt, die du so nicht überall findest — viele davon Unikate." },
-  { n: "02", h: "Hochwertig", p: "Echtes Massivholz, sorgfältig ausgewählt und verarbeitet. Kein Furnier-Schein." },
+  { n: "02", h: "Hochwertig", p: "Teak, Mango und Suar, vieles davon vollmassiv und recycelt — dazu Polster, Beton und Metall." },
   { n: "03", h: "Faire Preise", p: "Geschickter Einkauf gibt uns Spielraum — den wir an dich weitergeben." },
   { n: "04", h: "Günstig eingekauft", p: "Neue Möbel aus Insolvenzen, Sonder- und Restposten — deshalb die Preise." },
 ];
@@ -162,7 +162,7 @@ export default function UeberUnsPage() {
             <Link href="/standorte" className="btn btn--solid">
               Standorte ansehen <span className="arr">→</span>
             </Link>
-            <Link href="/shop" className="btn">Zum Shop</Link>
+            <Link href="/shop" className="btn">Sortiment ansehen</Link>
           </div>
         </div>
       </section>

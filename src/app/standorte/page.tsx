@@ -83,7 +83,7 @@ export default function StandortePage() {
             <ul className="hl" data-reveal="">
               <li>Tische nach Maß</li>
               <li>Wohnen &amp; Esszimmer</li>
-              <li>Schlafen</li>
+              <li>Schränke &amp; Sideboards</li>
               <li>Accessoires</li>
             </ul>
             <div className="flagship__cta" data-reveal="">
@@ -124,8 +124,8 @@ export default function StandortePage() {
                 <h3>Schermbeck</h3>
                 <p className="mt-s" style={{ fontSize: "14.5px" }}>
                   Rund 800 m² in den ehemaligen Bundeswehrhallen: Auslaufartikel,
-                  B-Ware und stark reduzierte Einzelstücke. Das Angebot wechselt
-                  ständig — vorbeischauen lohnt sich.
+                  B-Ware und weitere stark reduzierte Artikel. Das Angebot
+                  wechselt regelmäßig — vorbeischauen lohnt sich.
                 </p>
                 <div className="info">
                   <div>
@@ -154,7 +154,7 @@ export default function StandortePage() {
                 <ul className="hl">
                   <li>Auslaufartikel</li>
                   <li>B-Ware</li>
-                  <li>Einzelstücke</li>
+                  <li>Ausstellungsstücke</li>
                 </ul>
                 <div className="lc__cta">
                   <a
@@ -175,7 +175,7 @@ export default function StandortePage() {
                 {/* TODO: echtes Foto aus Haltern am See — aktuell Platzhalter aus dem Bildarchiv */}
                 <ImageSlot
                   src="/img/standort-haltern.jpg"
-                  alt="Riegel Interior in Haltern am See"
+                  alt="Massivholzmöbel im Showroom von Riegel Interior"
                   sizes="(max-width: 900px) 100vw, 45vw"
                 />
               </div>
@@ -248,7 +248,7 @@ export default function StandortePage() {
               Anrufen
             </a>
             <Link href="/shop" className="btn" style={darkBtn}>
-              Zum Shop <span className="arr">→</span>
+              Sortiment ansehen <span className="arr">→</span>
             </Link>
           </div>
         </div>

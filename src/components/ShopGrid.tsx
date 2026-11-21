@@ -95,7 +95,7 @@ export function ShopGrid() {
                           {p.price} €
                         </>
                       ) : (
-                        <em className="prod__ask">Preis im Markt</em>
+                        <em className="prod__ask">Preis auf Anfrage</em>
                       )}
                     </span>
                   </div>

@@ -38,7 +38,7 @@ export function ProductRail({ items }: { items: Product[] }) {
                 {p.price} €
               </>
             ) : (
-              <em>Preis im Markt</em>
+              <em>Preis auf Anfrage</em>
             )}
           </span>
         </div>
