@@ -238,7 +238,9 @@ export default function Home() {
           </div>
         </div>
 
-        <ProductRail items={PRODUCTS} />
+        {/* die zuletzt eingestellten Stücke — nicht alle 199, sonst läuft
+            die Schiene minutenlang, bevor sie sich wiederholt */}
+        <ProductRail items={PRODUCTS.slice(0, 14)} />
       </section>
 
       {/* ── HOLZARTEN ── */}

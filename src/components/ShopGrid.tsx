@@ -21,15 +21,15 @@ export function ShopGrid() {
               className={`chip${active === f.id ? " active" : ""}`}
               onClick={() => setActive(f.id)}
             >
-              {f.label}
+              {f.label} <span className="chip__n">{f.count}</span>
             </button>
           ))}
         </div>
       </div>
 
       <div className="wrap">
-        {/* key am Grid: beim Filterwechsel werden die Karten neu gemountet,
-            dadurch läuft die gestaffelte Einblendung erneut. */}
+        {/* key am Raster: beim Filterwechsel montiert React neu, dadurch
+            läuft die gestaffelte Einblendung erneut. */}
         <div className="shop-grid" key={active}>
           {shown.map((p, i) => {
             const isOpen = !!open[p.id];
@@ -38,7 +38,9 @@ export function ShopGrid() {
                 className="prod"
                 key={p.id}
                 data-cat={p.cat}
-                style={{ "--i": i } as React.CSSProperties}
+                /* nur die ersten Reihen staffeln — sonst wartet Karte 190
+                   zwölf Sekunden auf ihren Auftritt */
+                style={{ "--i": Math.min(i, 11) } as React.CSSProperties}
               >
                 <div className="prod__stage">
                   <ImageSlot
@@ -47,9 +49,9 @@ export function ShopGrid() {
                     sizes="(max-width: 620px) 92vw, (max-width: 1000px) 46vw, 31vw"
                     priority={i < 3}
                   />
-                  {p.was && <span className="prod__flag">Abverkauf</span>}
-                  {!p.was && p.unikat && (
-                    <span className="prod__flag prod__flag--quiet">Einzelstück</span>
+                  {p.flag && <span className="prod__flag">{p.flag}</span>}
+                  {!p.flag && p.bestell && (
+                    <span className="prod__flag prod__flag--quiet">Bestellware</span>
                   )}
                   <button className="prod__fav" aria-label={`${p.name} merken`}>
                     ♡
@@ -70,7 +72,7 @@ export function ShopGrid() {
                       )}
                     </span>
                   </div>
-                  <p className="prod__sub">{p.sub}</p>
+                  {p.sub && <p className="prod__sub">{p.sub}</p>}
 
                   <button
                     className="prod__toggle"
@@ -89,16 +91,19 @@ export function ShopGrid() {
                             <dd>{p.masse}</dd>
                           </div>
                         )}
-                        {p.material && (
+                        {p.loc && (
                           <div className="spec">
-                            <dt>Material</dt>
-                            <dd>{p.material}</dd>
+                            <dt>Steht in</dt>
+                            <dd>
+                              {p.loc}
+                              {p.bestell && " · auf Bestellung"}
+                            </dd>
                           </div>
                         )}
-                        {p.extra && (
+                        {p.note && (
                           <div className="spec">
                             <dt>Hinweis</dt>
-                            <dd>{p.extra}</dd>
+                            <dd>{p.note}</dd>
                           </div>
                         )}
                       </dl>

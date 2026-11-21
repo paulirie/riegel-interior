@@ -414,6 +414,7 @@ image-slot{
   transition:.35s var(--ease); }
 .chip:hover{ border-color:var(--ink); color:var(--ink); }
 .chip.active{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
+.chip__n{ font-size:10px; opacity:.5; margin-left:3px; letter-spacing:.04em; }
 
 /* Grid */
 /* minmax(0,1fr) statt 1fr: sonst zieht eine lange Produktzeile ihre Spalte
@@ -432,7 +433,9 @@ image-slot{
 @keyframes prod-in{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; transform:none; } }
 .prod:hover{ box-shadow:0 26px 60px -28px rgba(12,11,10,.45); border-color:var(--line); }
 
-.prod__stage{ position:relative; aspect-ratio:1/1; overflow:hidden; background:#e0d7c8; }
+/* 4:3 wie die Aufnahmen selbst — ein quadratischer Zuschnitt würde den
+   Sofas und Esstischen seitlich etwas abschneiden. */
+.prod__stage{ position:relative; aspect-ratio:4/3; overflow:hidden; background:#e0d7c8; }
 .prod__stage .ph{ position:absolute; inset:0; }
 /* Das Bild selbst zieht langsam auf — der Rahmen bleibt stehen. */
 .prod__stage img{ transition:transform 1.3s var(--ease), filter 1.3s var(--ease); }
@@ -805,7 +808,7 @@ image-slot{
 
 .pcard{ flex:none; width:clamp(210px,19vw,290px); margin-right:var(--rail-gap);
   display:block; color:inherit; }
-.pcard__img{ position:relative; aspect-ratio:1/1; overflow:hidden; background:#e0d7c8; }
+.pcard__img{ position:relative; aspect-ratio:4/3; overflow:hidden; background:#e0d7c8; }
 .pcard__img .ph{ position:absolute; inset:0; }
 .pcard__img img{ transition:transform 1.2s var(--ease); }
 .pcard:hover .pcard__img img{ transform:scale(1.06); }
