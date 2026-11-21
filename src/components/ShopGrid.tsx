@@ -59,6 +59,7 @@ export function ShopGrid() {
                 </div>
 
                 <div className="prod__body">
+                  {p.brand && <p className="prod__brand">{p.brand}</p>}
                   <div className="prod__row">
                     <h3 className="prod__name">{p.name}</h3>
                     <span className="prod__price">

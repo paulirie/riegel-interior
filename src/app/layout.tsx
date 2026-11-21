@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s — Riegel Interior",
   },
   description:
-    "Riegel Interior — einzigartige Massivholzmöbel aus aller Welt in hoher Qualität, zu richtig attraktiven Preisen. Flagship-Store Wesel, Recklinghausen & Haltern am See.",
+    "Riegel Interior — einzigartige Massivholzmöbel aus aller Welt in hoher Qualität, zu richtig attraktiven Preisen. Flagship-Store Wesel, Lagerverkauf Schermbeck & Haltern am See.",
   openGraph: {
     title: "Riegel Interior — Einzigartige Möbel aus aller Welt",
     description:

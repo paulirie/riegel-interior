@@ -6,14 +6,15 @@ import { OpenStatus, type Opening } from "@/components/OpenStatus";
 export const metadata: Metadata = {
   title: "Standorte",
   description:
-    "Riegel Interior in NRW: Flagship-Store Wesel, Recklinghausen und Haltern am See. Adressen, Öffnungszeiten und Highlights.",
+    "Riegel Interior in NRW: Flagship-Store Wesel, Lagerverkauf Schermbeck und Haltern am See. Adressen, Öffnungszeiten und Highlights.",
 };
 
 /* 0 = Sonntag … 6 = Samstag */
 const HOURS: Record<string, Opening[]> = {
-  wesel:   [{ days: [1, 2, 3, 4, 5], from: 12, to: 19 }, { days: [6], from: 10, to: 15 }],
-  reck:    [{ days: [1, 2, 3, 4, 5, 6], from: 11, to: 19 }],
-  haltern: [{ days: [1, 2, 3, 4, 5], from: 12, to: 19 }, { days: [6], from: 10, to: 15 }],
+  wesel:      [{ days: [1, 2, 3, 4, 5], from: 12, to: 19 }, { days: [6], from: 10, to: 15 }],
+  /* Lagerverkauf: nur donnerstags und samstags */
+  schermbeck: [{ days: [4], from: 15, to: 19 }, { days: [6], from: 10, to: 15 }],
+  haltern:    [{ days: [1, 2, 3, 4, 5], from: 12, to: 19 }, { days: [6], from: 10, to: 15 }],
 };
 
 const darkBtn = { borderColor: "rgba(250,248,244,.5)", color: "var(--bone)" };
@@ -107,54 +108,57 @@ export default function StandortePage() {
             Weitere Standorte
           </p>
           <div className="loc-cards">
-            {/* Recklinghausen */}
+            {/* Schermbeck */}
             <article className="lc" data-reveal="">
               <div className="lc__media par">
+                {/* TODO: echtes Foto aus dem Lagerverkauf Schermbeck — die
+                    ehemaligen Bundeswehrhallen sehen anders aus als unsere
+                    Showrooms, deshalb hier bewusst ein Platzhalter. */}
                 <ImageSlot
-                  src="/img/standort-recklinghausen-2.jpg"
-                  alt="Verkaufsfläche von Riegel Interior im Palais Vest Recklinghausen"
+                  label="Foto Lagerverkauf Schermbeck"
                   sizes="(max-width: 900px) 100vw, 45vw"
                 />
               </div>
               <div className="lc__body">
-                <p className="eyebrow">Im Palais Vest</p>
-                <h3>Recklinghausen</h3>
+                <p className="eyebrow">Lagerverkauf</p>
+                <h3>Schermbeck</h3>
                 <p className="mt-s" style={{ fontSize: "14.5px" }}>
-                  Auf moderner Fläche im Palais Vest — mitten in der Stadt,
-                  garantiert ein Schnäppchen für dein Zuhause.
+                  Rund 800 m² in den ehemaligen Bundeswehrhallen: Auslaufartikel,
+                  B-Ware und stark reduzierte Einzelstücke. Das Angebot wechselt
+                  ständig — vorbeischauen lohnt sich.
                 </p>
                 <div className="info">
                   <div>
                     <div className="lab">Adresse</div>
-                    <div className="v">Palais Vest, Löhrhof 1<br />45657 Recklinghausen</div>
+                    <div className="v">Landwehr 152<br />46514 Schermbeck</div>
                   </div>
                   <div>
                     <div className="lab">Telefon</div>
                     <div className="v">
-                      <a href="tel:+4923611066202">02361 10 66 202</a>
+                      <a href="tel:+4928114793270">0281 147 93 270</a>
                       <br />
-                      <a href="mailto:recklinghausen@riegel-interior.com">recklinghausen@riegel-interior.com</a>
+                      <a href="mailto:shop@riegel-interior.com">shop@riegel-interior.com</a>
                     </div>
                   </div>
                   <div>
                     <div className="lab">Öffnungszeiten</div>
-                    <div className="v">Mo–Sa 11–19 Uhr<br />
-                      <OpenStatus hours={HOURS.reck} />
+                    <div className="v">Do 15–19 Uhr · Sa 10–15 Uhr<br />
+                      <OpenStatus hours={HOURS.schermbeck} />
                     </div>
                   </div>
                   <div>
                     <div className="lab">Highlights</div>
-                    <div className="v">Moderne Möbel &amp; Teak</div>
+                    <div className="v">Sonder- &amp; Restposten</div>
                   </div>
                 </div>
                 <ul className="hl">
-                  <li>Tische &amp; Stühle</li>
-                  <li>Kommoden</li>
-                  <li>Teakmöbel</li>
+                  <li>Auslaufartikel</li>
+                  <li>B-Ware</li>
+                  <li>Einzelstücke</li>
                 </ul>
                 <div className="lc__cta">
                   <a
-                    href="https://www.google.com/maps/search/Riegel+Interior+Palais+Vest+Recklinghausen"
+                    href="https://www.google.com/maps/search/Riegel+Interior+Landwehr+152+Schermbeck"
                     target="_blank"
                     rel="noopener"
                     className="link"

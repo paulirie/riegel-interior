@@ -55,7 +55,7 @@ export default function Home() {
         </div>
         <div className="hero__scrim"></div>
         <div className="hero__meta">
-          Wesel · Flagship<br />Recklinghausen<br />Haltern am See
+          Wesel · Flagship<br />Schermbeck<br />Haltern am See
         </div>
         <div className="hero__inner">
           <p className="eyebrow hero__eyebrow" data-reveal="" data-reveal-delay="1">
@@ -289,14 +289,13 @@ export default function Home() {
             </Link>
             <Link href="/standorte" className="loc" data-reveal="" data-reveal-delay="1">
               <div className="loc__img par">
-                <ImageSlot
-                  src="/img/standort-recklinghausen.jpg"
-                  alt="Riegel Interior im Palais Vest in Recklinghausen"
-                  sizes="(max-width: 900px) 100vw, 30vw"
-                />
+                {/* TODO: echtes Foto aus dem Lagerverkauf Schermbeck — die
+                    ehemaligen Bundeswehrhallen sehen anders aus als unsere
+                    Showrooms, ein Showroom-Foto wäre hier gelogen. */}
+                <ImageSlot label="Foto Lagerverkauf Schermbeck" />
                 <div className="loc__cap">
-                  <div className="nm">Recklinghausen</div>
-                  <div className="meta">Im Palais Vest</div>
+                  <div className="nm">Schermbeck</div>
+                  <div className="meta">Lagerverkauf · ca. 800 m²</div>
                 </div>
               </div>
             </Link>

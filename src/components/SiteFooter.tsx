@@ -28,7 +28,7 @@ export function SiteFooter() {
             <h4>Standorte</h4>
             <ul>
               <li><Link href="/standorte">Wesel — Flagship</Link></li>
-              <li><Link href="/standorte">Recklinghausen</Link></li>
+              <li><Link href="/standorte">Schermbeck</Link></li>
               <li><Link href="/standorte">Haltern am See</Link></li>
             </ul>
           </div>
