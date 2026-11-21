@@ -3,6 +3,7 @@ import { ImageSlot } from "@/components/ImageSlot";
 import { ManufakturVideo } from "@/components/ManufakturVideo";
 import { Ticker } from "@/components/Ticker";
 import { CountUp } from "@/components/CountUp";
+import { CategoryRail } from "@/components/CategoryRail";
 
 const CATS = [
   { slot: "Esstische", nm: "Esstische", ct: "Eiche · Suar · Teak", img: "/img/kat-esstische.jpg" },
@@ -160,31 +161,9 @@ export default function Home() {
               Alle Produkte <span className="arr">→</span>
             </Link>
           </div>
-          <div className="cat-grid">
-            {CATS.map((c, i) => (
-              <Link
-                key={c.nm}
-                href="/shop"
-                className="cat"
-                data-reveal=""
-                data-reveal-delay={String((i % 4) || "")}
-              >
-                <div className="cat__img">
-                  <ImageSlot
-                    src={c.img}
-                    alt={`${c.nm} bei Riegel Interior`}
-                    sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
-                  />
-                  <span className="plus">+</span>
-                </div>
-                <div className="cat__label">
-                  <span className="nm">{c.nm}</span>
-                  <span className="ct">{c.ct}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
         </div>
+
+        <CategoryRail items={CATS} />
       </section>
 
       {/* ── MIX & MATCH ── */}
