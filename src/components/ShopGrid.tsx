@@ -4,6 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { PRODUCTS, FILTERS } from "@/data/site";
 import { ImageSlot } from "./ImageSlot";
+import { WHATSAPP } from "@/data/kontakt";
+
+/** Vorausgefüllte WhatsApp-Nachricht, damit nicht jeder "Hallo?" schreiben muss. */
+function whatsappLink(name: string, loc?: string) {
+  const text = `Hallo! Ich interessiere mich für „${name}“${
+    loc ? ` (${loc})` : ""
+  }. Ist das Stück noch da?`;
+  return `https://wa.me/${WHATSAPP.e164}?text=${encodeURIComponent(text)}`;
+}
 
 export function ShopGrid() {
   const [active, setActive] = useState("all");
@@ -86,12 +95,22 @@ export function ShopGrid() {
                   <div className="prod__detail">
                     <div>
                       <dl>
-                        {p.masse && (
-                          <div className="spec spec--maße">
-                            <dt>Maße</dt>
-                            <dd>{p.masse}</dd>
+                        {/* Eckdaten aus der Anzeige; fehlt die Liste, bleibt
+                            wenigstens das Maß aus dem Titel. */}
+                        {(p.specs?.length
+                          ? p.specs
+                          : p.masse
+                            ? [{ k: "Maße", v: p.masse }]
+                            : []
+                        ).map((s) => (
+                          <div
+                            key={s.k}
+                            className={`spec${s.k === "Maße" ? " spec--maße" : ""}`}
+                          >
+                            <dt>{s.k}</dt>
+                            <dd>{s.v}</dd>
                           </div>
-                        )}
+                        ))}
                         {p.loc && (
                           <div className="spec">
                             <dt>Steht in</dt>
@@ -109,12 +128,14 @@ export function ShopGrid() {
                         )}
                       </dl>
                       <div className="prod__cta">
-                        <Link
-                          href="/standorte"
+                        <a
                           className="btn btn--sm btn--block btn--solid"
+                          href={whatsappLink(p.name, p.loc)}
+                          target="_blank"
+                          rel="noopener"
                         >
-                          Vorbestellen
-                        </Link>
+                          Per WhatsApp fragen
+                        </a>
                         <Link href="/standorte" className="btn btn--sm btn--block">
                           Im Markt ansehen
                         </Link>
