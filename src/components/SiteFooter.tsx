@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WESEL, SCHERMBECK, HALTERN, MAIL } from "@/data/kontakt";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -27,15 +28,15 @@ export function SiteFooter() {
           <div>
             <h4>Standorte</h4>
             <ul>
-              <li><Link href="/standorte">Wesel — Flagship</Link></li>
-              <li><Link href="/standorte">Schermbeck</Link></li>
-              <li><Link href="/standorte">Haltern am See</Link></li>
+              <li><Link href={WESEL.anker}>Wesel — Flagship</Link></li>
+              <li><Link href={SCHERMBECK.anker}>Schermbeck</Link></li>
+              <li><Link href={HALTERN.anker}>Haltern am See</Link></li>
             </ul>
           </div>
           <div>
             <h4>Kontakt</h4>
             <ul>
-              <li><a href="tel:+4928114793270">0281 147 93 270</a></li>
+              <li><a href={`tel:${WESEL.tel}`}>{WESEL.nummer}</a></li>
               <li>
                 <a
                   href="https://www.instagram.com/riegel.interior/"
@@ -45,7 +46,7 @@ export function SiteFooter() {
                   Instagram
                 </a>
               </li>
-              <li><a href="mailto:shop@riegel-interior.com">shop@riegel-interior.com</a></li>
+              <li><a href={`mailto:${MAIL}`}>{MAIL}</a></li>
             </ul>
           </div>
         </div>

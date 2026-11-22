@@ -455,7 +455,7 @@ image-slot{
   background:var(--ink); color:var(--bone); }
 .prod__flag--quiet{ background:rgba(250,248,244,.92); color:var(--graphite); font-weight:500; }
 
-.prod__body{ padding:22px 22px 24px; display:flex; flex-direction:column; gap:4px; }
+.prod__body{ container:prodbody / inline-size; padding:22px 22px 24px; display:flex; flex-direction:column; gap:4px; }
 .prod__brand{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--mist); margin-bottom:5px; }
 .prod__row{ display:flex; justify-content:space-between; align-items:baseline; gap:14px; }
 .prod__name{ font-family:var(--serif); font-size:clamp(20px,1.6vw,25px); font-weight:400; line-height:1.1; }
@@ -476,21 +476,43 @@ image-slot{
   font-size:14px; transition:.4s var(--ease); }
 .prod__toggle[aria-expanded="true"] .ic{ background:var(--ink); color:var(--bone); transform:rotate(45deg); border-color:var(--ink); }
 .prod__detail{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .55s var(--ease); }
-.prod__detail > div{ overflow:hidden; }
+/* visibility, nicht nur overflow: sonst stehen die Links der zugeklappten
+   Karte weiter in der Tabulatorreihenfolge — bei 199 Karten rund 600
+   unsichtbare Haltepunkte. visibility springt beim Aufklappen sofort auf
+   sichtbar und erst am Ende des Zuklappens zurück, die Bewegung bleibt also. */
+.prod__detail > div{ overflow:hidden; visibility:hidden;
+  transition:visibility .55s var(--ease); }
 .prod__toggle[aria-expanded="true"] + .prod__detail{ grid-template-rows:1fr; }
+.prod__toggle[aria-expanded="true"] + .prod__detail > div{ visibility:visible; }
 .spec{ display:flex; gap:14px; padding:13px 0; border-bottom:1px solid var(--line-soft); }
 .spec:first-child{ padding-top:18px; }
 .spec dt{ flex:0 0 96px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--stone); }
 .spec dd{ font-size:14px; color:var(--ink); }
 .spec--maße dd{ font-family:var(--serif); font-size:17px; }
-.prod__cta{ display:flex; gap:10px; margin-top:18px; }
-/* Link auf das Inserat, aus dem der Eintrag stammt — führt aus dem Shop
-   heraus, deshalb leise gesetzt und nicht als Schaltfläche. */
-.prod__ad{ display:inline-block; margin-top:14px; font-size:11.5px; letter-spacing:.06em;
-  color:var(--stone); border-bottom:1px solid var(--line); padding-bottom:2px;
-  transition:color .3s var(--ease), border-color .3s var(--ease); }
-.prod__ad:hover{ color:var(--ink); border-color:var(--ink); }
-.prod__ad .arr{ font-size:10px; }
+/* "Steht in Wesel" — der Markt ist verlinkt und führt auf seine Seite. */
+.prod__ort{ margin-top:16px; font-size:12px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--stone); }
+.prod__ort a{ color:var(--ink); border-bottom:1px solid var(--ink);
+  padding-bottom:2px; transition:opacity .3s var(--ease); }
+.prod__ort a:hover{ opacity:.6; }
+
+/* Zwei Wege aus der Karte heraus, unterschiedlich laut: die ganze Anzeige
+   ist das Hauptziel und bekommt die volle Breite der ersten Zeile; der
+   Anruf steht als heller Knopf daneben. Unter 420 px untereinander. */
+.prod__cta{ display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
+.prod__cta-main{ flex:1 1 100%; justify-content:center; font-weight:600;
+  padding-block:16px; letter-spacing:.17em; }
+.prod__cta-side{ flex:1 1 100%; justify-content:center;
+  background:var(--bone); border-color:var(--line); color:var(--ink); }
+.prod__cta-side:hover{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
+/* Nebeneinander, sobald die Karte breit genug ist, dass beide Beschriftungen
+   einzeilig bleiben — das hängt an der Karte, nicht am Fenster, denn das
+   Raster hat je nach Breite ein bis drei Spalten. Darunter untereinander,
+   beide über die volle Breite. */
+@container prodbody (min-width: 440px){
+  .prod__cta-main{ flex:1 1 56%; }
+  .prod__cta-side{ flex:1 1 0; white-space:nowrap; }
+}
 .btn--sm{ padding:13px 20px; font-size:11px; }
 .btn--block{ flex:1; justify-content:center; }
 
@@ -922,3 +944,7 @@ image-slot{
   .prod-rail__track{ animation:none !important; transform:none !important; }
   .pcard{ scroll-snap-align:start; }
 }
+
+/* Sprungmarken der Standorte: der Header steht fest, also muss das Ziel
+   unter ihm anfangen. Die Produktkarten verlinken genau hierher. */
+#wesel, #schermbeck, #haltern{ scroll-margin-top:92px; }

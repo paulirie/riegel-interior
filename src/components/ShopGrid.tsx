@@ -4,15 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { PRODUCTS, FILTERS } from "@/data/site";
 import { ImageSlot } from "./ImageSlot";
-import { WHATSAPP, telFuer } from "@/data/kontakt";
+import { WHATSAPP, marktFuer, telFuer } from "@/data/kontakt";
 
 /**
- * Erste Schaltfläche der Karte.
+ * Zweite Schaltfläche der Karte: der direkte Draht in den Markt, in dem das
+ * Stück steht.
  *
  * Solange keine WhatsApp-Nummer bestätigt ist, steht dort "Anrufen" mit der
- * Nummer des Marktes, in dem das Stück steht. Sobald WHATSAPP.e164 gesetzt
- * ist, wird daraus von selbst der WhatsApp-Knopf mit vorausgefüllter
- * Nachricht — damit nicht jeder mit "Hallo?" anfangen muss.
+ * Nummer genau dieses Marktes. Sobald WHATSAPP.e164 gesetzt ist, wird daraus
+ * von selbst der WhatsApp-Knopf mit vorausgefüllter Nachricht — damit nicht
+ * jeder mit "Hallo?" anfangen muss.
  */
 function frageCta(name: string, loc?: string) {
   if (WHATSAPP.e164) {
@@ -128,15 +129,6 @@ export function ShopGrid() {
                             <dd>{s.v}</dd>
                           </div>
                         ))}
-                        {p.loc && (
-                          <div className="spec">
-                            <dt>Steht in</dt>
-                            <dd>
-                              {p.loc}
-                              {p.bestell && " · wird im Markt bestellt"}
-                            </dd>
-                          </div>
-                        )}
                         {p.note && (
                           <div className="spec">
                             <dt>Hinweis</dt>
@@ -144,35 +136,52 @@ export function ShopGrid() {
                           </div>
                         )}
                       </dl>
-                      <div className="prod__cta">
-                        {(() => {
-                          const cta = frageCta(p.name, p.loc);
-                          return (
-                            <a
-                              className="btn btn--sm btn--block btn--solid"
-                              href={cta.href}
-                              {...(cta.extern
-                                ? { target: "_blank", rel: "noopener noreferrer" }
-                                : {})}
-                            >
-                              {cta.label}
-                            </a>
-                          );
-                        })()}
-                        <Link href="/standorte" className="btn btn--sm btn--block">
-                          Weg zum Markt
-                        </Link>
-                      </div>
-                      {p.url && (
-                        <a
-                          className="prod__ad"
-                          href={p.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Anzeige mit allen Fotos ansehen <span className="arr">↗</span>
-                        </a>
-                      )}
+                      {/* Erst sagen, wo das Stück steht — der Markt führt zu
+                          seiner Seite. Dann die beiden Wege: die ganze Anzeige
+                          ansehen, oder genau diesen Markt anrufen. */}
+                      {(() => {
+                        const markt = marktFuer(p.loc);
+                        const cta = frageCta(p.name, p.loc);
+                        return (
+                          <>
+                            {markt && (
+                              <p className="prod__ort">
+                                {p.bestell ? "Bestellbar über " : "Steht in "}
+                                <Link href={markt.anker}>{markt.kurz}</Link>
+                              </p>
+                            )}
+                            <div className="prod__cta">
+                              {p.url && (
+                                <a
+                                  className="btn btn--sm btn--solid prod__cta-main"
+                                  href={p.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Ganze Anzeige ansehen <span className="arr">↗</span>
+                                </a>
+                              )}
+                              {/* Die drei Stücke von den Preisschildern haben keine
+                                  Anzeige. Dann ist der Anruf die Haupthandlung und
+                                  bekommt auch deren Gewicht — nie ein einzelner
+                                  heller Knopf, der aussieht, als fehle etwas. */}
+                              <a
+                                className={
+                                  p.url
+                                    ? "btn btn--sm prod__cta-side"
+                                    : "btn btn--sm btn--solid prod__cta-main"
+                                }
+                                href={cta.href}
+                                {...(cta.extern
+                                  ? { target: "_blank", rel: "noopener noreferrer" }
+                                  : {})}
+                              >
+                                {cta.label}
+                              </a>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ImageSlot } from "@/components/ImageSlot";
 import { OpenStatus, type Opening } from "@/components/OpenStatus";
+import { WESEL, SCHERMBECK, HALTERN } from "@/data/kontakt";
 
 export const metadata: Metadata = {
   title: "Standorte",
@@ -37,7 +38,7 @@ export default function StandortePage() {
       </section>
 
       {/* FLAGSHIP WESEL */}
-      <section className="flagship">
+      <section className="flagship" id="wesel">
         <div className="flagship__grid">
           <div className="flagship__media par par--deep">
             <ImageSlot
@@ -64,9 +65,9 @@ export default function StandortePage() {
               <div>
                 <div className="lab">Telefon</div>
                 <div className="v">
-                  <a href="tel:+4928114793270">0281 147 93 270</a>
+                  <a href={`tel:${WESEL.tel}`}>{WESEL.nummer}</a>
                   <br />
-                  <a href="mailto:shop@riegel-interior.com">shop@riegel-interior.com</a>
+                  <a href={`mailto:${WESEL.mail}`}>{WESEL.mail}</a>
                 </div>
               </div>
               <div>
@@ -109,7 +110,7 @@ export default function StandortePage() {
           </p>
           <div className="loc-cards">
             {/* Schermbeck */}
-            <article className="lc" data-reveal="">
+            <article className="lc" id="schermbeck" data-reveal="">
               <div className="lc__media par">
                 {/* TODO: echtes Foto aus dem Lagerverkauf Schermbeck — die
                     ehemaligen Bundeswehrhallen sehen anders aus als unsere
@@ -135,9 +136,9 @@ export default function StandortePage() {
                   <div>
                     <div className="lab">Telefon</div>
                     <div className="v">
-                      <a href="tel:+4928114793270">0281 147 93 270</a>
+                      <a href={`tel:${SCHERMBECK.tel}`}>{SCHERMBECK.nummer}</a>
                       <br />
-                      <a href="mailto:shop@riegel-interior.com">shop@riegel-interior.com</a>
+                      <a href={`mailto:${SCHERMBECK.mail}`}>{SCHERMBECK.mail}</a>
                     </div>
                   </div>
                   <div>
@@ -170,7 +171,7 @@ export default function StandortePage() {
             </article>
 
             {/* Haltern */}
-            <article className="lc" data-reveal="" data-reveal-delay="1">
+            <article className="lc" id="haltern" data-reveal="" data-reveal-delay="1">
               <div className="lc__media par">
                 {/* TODO: echtes Foto aus Haltern am See — aktuell Platzhalter aus dem Bildarchiv */}
                 <ImageSlot
@@ -194,9 +195,9 @@ export default function StandortePage() {
                   <div>
                     <div className="lab">Telefon</div>
                     <div className="v">
-                      <a href="tel:+4923645099515">02364 50 99 515</a>
+                      <a href={`tel:${HALTERN.tel}`}>{HALTERN.nummer}</a>
                       <br />
-                      <a href="mailto:haltern@riegel-interior.com">haltern@riegel-interior.com</a>
+                      <a href={`mailto:${HALTERN.mail}`}>{HALTERN.mail}</a>
                     </div>
                   </div>
                   <div>
@@ -244,7 +245,7 @@ export default function StandortePage() {
             data-reveal-delay="2"
             style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}
           >
-            <a href="tel:+4928114793270" className="btn" style={darkBtn}>
+            <a href={`tel:${WESEL.tel}`} className="btn" style={darkBtn}>
               Anrufen
             </a>
             <Link href="/shop" className="btn" style={darkBtn}>
