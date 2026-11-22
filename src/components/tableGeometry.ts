@@ -19,8 +19,8 @@
    ───────────────────────────────────────────────────────────────────────── */
 
 export const K = 2.52;                 // Einheiten je Zentimeter
-export const SX = 0.36;                // Tiefenversatz nach rechts
-export const SY = 0.5;                 // Tiefenversatz nach oben
+export const SX = 0.56;                // Tiefenversatz nach rechts
+export const SY = 0.44;                // Tiefenversatz nach oben
 export const OX = 70;                  // Ursprung (0,0,0) in der viewBox
 export const OY = 392;
 export const VB = { w: 1000, h: 470 };
@@ -30,9 +30,11 @@ export const HT = 72;                  // Gestellhöhe in cm — bewusst OHNE Ma
                                        // kein Schild und kein Inserat nennt sie
 export const TOPZ = HT + TH;
 export const INSET = 26;               // Rücksprung der Rahmen vom Plattenende
-export const RAW_AMP = 3.2;            // cm, größter Ausschlag der Baumkante
+export const RAW_AMP = 1.7;            // cm, größter Ausschlag der Baumkante
 export const SWISS_C = 1.2;            // cm, Fasenbreite der Schweizer Kante
-export const SAMPLES = 48;             // Stützpunkte je Längskante — immer gleich viele
+export const SAMPLES = 96;             // Stützpunkte je Längskante — immer gleich viele
+                                       // (die schnellste Schwingung ist 9,1 Perioden
+                                       // lang, das sind rund 10 Punkte je Periode)
 
 export type Vec = { len: number; dep: number; raw: number; swiss: number; frm: number };
 
@@ -56,25 +58,38 @@ export const planeTop = (z: number) =>
 export const planeSide = (x: number) =>
   `matrix(${r(SX * K)} ${r(-SY * K)} 0 ${-K} ${r(OX + x * K)} ${OY})`;
 
-/* Niederfrequente, deterministische Wuchskurve: drei Sinus mit
-   inkommensurablen Frequenzen. Glatt — eine Baumkante ist keine Säge —
+/* Deterministische Wuchskurve. Vorbild ist das eigene Detailfoto der
+   Kante: eine Baumkante ist fast gerade. Sie läuft nicht in einem großen
+   Bogen durch, sondern bleibt dicht an der Flucht und setzt dort, wo ein
+   Ast saß, eine kleine Nase ab. Deshalb vier Sinus mit steigender
+   Frequenz und kleiner werdendem Ausschlag statt einer langen Welle —
    und überall gleich: kein Math.random und kein fract(sin(x)*43758),
    das zwischen Server und Client kippen kann. */
 function wuchs(t: number, ph: number) {
-  return 0.55 * Math.sin(6.2832 * t + 0.7 + ph)
-       + 0.30 * Math.sin(6.2832 * 2.3 * t + 2.1 + ph)
-       + 0.15 * Math.sin(6.2832 * 3.7 * t + 4.4 + ph);
+  return 0.40 * Math.sin(6.2832 * 1.7 * t + 0.7 + ph)
+       + 0.26 * Math.sin(6.2832 * 3.9 * t + 2.1 + ph)
+       + 0.20 * Math.sin(6.2832 * 7.3 * t + 4.4 + ph)
+       + 0.14 * Math.sin(6.2832 * 9.1 * t + 1.3 + ph);
+}
+/* Die Enden sind gesägt: dort läuft der Wuchs aus, die Platte hat an
+   beiden Stirnseiten eine rechtwinklige Ecke. Die Potenz hält das Fenster
+   über die ganze Länge bei 1 und zieht es erst kurz vor dem Ende herunter. */
+function saum(t: number) {
+  return Math.pow(Math.sin(Math.PI * Math.max(0, Math.min(1, t))), 0.33);
 }
 
 /** Vordere Längskante an der Stelle t (0..1). y nach vorn, dz = Stärkeschwankung. */
 export function edgeAt(v: Vec, t: number) {
   const w = wuchs(t, 0);
-  return { y: -v.raw * RAW_AMP * (0.5 + 0.5 * w), dz: v.raw * 0.9 * w };
+  return {
+    y: -v.raw * RAW_AMP * saum(t) * (0.5 + 0.5 * w),
+    dz: v.raw * 0.45 * saum(t) * w,
+  };
 }
 /** Hintere Längskante, andere Phase — dasselbe Brett, nicht gespiegelt. */
 function backAt(v: Vec, t: number) {
   const w = wuchs(t, 2.6);
-  return v.dep + v.raw * RAW_AMP * (0.5 + 0.5 * w);
+  return v.dep + v.raw * RAW_AMP * saum(t) * (0.5 + 0.5 * w);
 }
 
 /** Deckfläche. Bei Schweizer Kante um die Fasenbreite zurückgesetzt. */
@@ -225,10 +240,10 @@ export function mitre(v: Vec) {
    frm = 1 → die Streben haben die Seiten getauscht und kreuzen sich in der
    Mitte, aus der Kufe sind zwei Füße geworden: X-Balken-Set.
    Dazwischen steht ein V — eine Bewegung, kein Umschalter.               */
-const RAIL_H = 5;                      // cm Höhe der oberen Traverse
+const RAIL_H = 6;                      // cm Höhe der oberen Traverse
 const LEG_W = 10;                      // cm Breite des Flachstahls (100er Flachstahl)
 const FOOT_H = 5;                      // cm Höhe von Kufe und Füßen
-const FOOT_L = 19;                     // cm Länge eines Einzelfußes im X
+const FOOT_L = 15;                     // cm Länge eines Einzelfußes im X
 const BASE_W = 100;                    // cm Spannweite laut Preisschild (U-100-100)
 const FRAME_IN = 7;                    // cm Rücksprung der Rahmen von der Plattenkante
 /* Materialstärke des Flachstahls. Sie liegt quer zur Rahmenebene, also
@@ -261,7 +276,11 @@ export type Base = ReturnType<typeof base>;
 
 export const rectPath = (x: number, y: number, w: number, h: number) =>
   `M${r(x)},${r(y)}L${r(x + w)},${r(y)}L${r(x + w)},${r(y + h)}L${r(x)},${r(y + h)}Z`;
-export const railPath = (b: Base) => rectPath(b.y0, HT - RAIL_H, b.span, RAIL_H);
+/* Die Montageplatte steht an beiden Seiten ein Stück über die Streben
+   hinaus — auf dem Foto aus Wesel gut zu sehen. */
+const RAIL_OUT = 3;
+export const railPath = (b: Base) =>
+  rectPath(b.y0 - RAIL_OUT, HT - RAIL_H, b.span + 2 * RAIL_OUT, RAIL_H);
 export const kufePath = (b: Base) => rectPath(b.y0, 0, b.span, FOOT_H);
 export const legPath = (q: Base["legs"][number]) =>
   `M${r(q.yT - q.hw)},${HT - RAIL_H}L${r(q.yT + q.hw)},${HT - RAIL_H}` +
