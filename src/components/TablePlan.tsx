@@ -35,19 +35,35 @@ const DUR = 680;
    also kann die Rückseite ein <use> desselben Rahmens sein, dunkler und
    davor gezeichnet. Ein Satz Pfade, zwei sichtbare Flächen, und der Tween
    muss nur die vordere anfassen. */
-function Frame({ i, b }: { i: number; b: G.Base }) {
+function Frame({ i, b, o }: { i: number; b: G.Base; o: number }) {
   return (
-    <>
+    <g data-k={"frw" + i} opacity={o}>
       <use href={`#plan-fr${i}`} transform={`translate(${G.TKDX} 0)`} className="plan__frame--deep" />
       <g id={`plan-fr${i}`} data-k={"fr" + i} transform={G.planeSide(b.xs[i])} className="plan__frame">
         <path data-k={"kufe" + i} className="plan__steel" d={G.kufePath(b)} opacity={b.kufeO} />
-        <path data-k={"foot" + i + "a"} className="plan__steel" d={G.footPath(b.legs[0])} />
-        <path data-k={"foot" + i + "b"} className="plan__steel" d={G.footPath(b.legs[1])} />
+        <path data-k={"foot" + i + "a"} className="plan__steel" d={G.footPath(b.legs[0])} opacity={b.footO} />
+        <path data-k={"foot" + i + "b"} className="plan__steel" d={G.footPath(b.legs[1])} opacity={b.footO} />
         <path data-k={"leg" + i + "a"} className="plan__steel" d={G.legPath(b.legs[0])} />
         <path data-k={"leg" + i + "b"} className="plan__steel" d={G.legPath(b.legs[1])} />
+        <path data-k={"bar" + i} className="plan__steel" d={G.barPath(b)} opacity={b.barO} />
         <path data-k={"rail" + i} className="plan__steel plan__steel--rail" d={G.railPath(b)} />
       </g>
-    </>
+    </g>
+  );
+}
+
+/* Der Kreuzfuß in der Mitte. Eigene Gruppe, eigene Deckkraft: beim Wechsel
+   blenden die beiden Endrahmen aus, während er einblendet. */
+function Mitte({ sp, o }: { sp: G.Spider; o: number }) {
+  return (
+    <g data-k="mid" className="plan__frame" opacity={o}>
+      {sp.arme.map((d, i) => (
+        <path key={i} data-k={"sparm" + i} className="plan__steel" d={d} />
+      ))}
+      {sp.kreuz.map((d, i) => (
+        <path key={i} data-k={"spkr" + i} className="plan__steel plan__steel--rail" d={d} />
+      ))}
+    </g>
   );
 }
 
@@ -74,7 +90,7 @@ export function TablePlan({
   const s0 = useMemo(() => ({
     deck: G.deck(seed), cham: G.chamfer(seed), band: G.band(seed), end: G.endFace(seed),
     fries: G.fries(seed), mitre: G.mitre(seed),
-    shade: G.shade(seed), base: G.base(seed),
+    shade: G.shade(seed), base: G.base(seed), sp: G.spider(seed),
     dimL: G.dimLen(seed), dimD: G.dimDep(seed), det: G.detail(seed),
   }), [seed]);
 
@@ -108,16 +124,29 @@ export function TablePlan({
       setA("shade", G.shade(w));
 
       const b = G.base(w);
+      const endO = Math.round((1 - w.mid) * 100) / 100;
+      const midO = Math.round(w.mid * 100) / 100;
+      setA("mid", { opacity: midO });
+      if (midO > 0) {
+        const sp = G.spider(w);
+        sp.arme.forEach((d, k) => setD("sparm" + k, d));
+        sp.kreuz.forEach((d, k) => setD("spkr" + k, d));
+      }
       for (let i = 0; i < 2; i++) {
+        setA("frw" + i, { opacity: endO });
         const fr = el("fr" + i);
         if (fr) fr.setAttribute("transform", G.planeSide(b.xs[i]));
         setD("rail" + i, G.railPath(b));
         setD("kufe" + i, G.kufePath(b));
         setA("kufe" + i, { opacity: b.kufeO });
+        setD("bar" + i, G.barPath(b));
+        setA("bar" + i, { opacity: b.barO });
         setD("leg" + i + "a", G.legPath(b.legs[0]));
         setD("leg" + i + "b", G.legPath(b.legs[1]));
         setD("foot" + i + "a", G.footPath(b.legs[0]));
         setD("foot" + i + "b", G.footPath(b.legs[1]));
+        setA("foot" + i + "a", { opacity: b.footO });
+        setA("foot" + i + "b", { opacity: b.footO });
       }
       const rt = el("root");
       if (rt) rt.setAttribute("transform", `translate(${G.centerDx(w)} 0)`);
@@ -158,7 +187,11 @@ export function TablePlan({
         dep: a.dep + (t.dep - a.dep) * e,
         raw: a.raw + (t.raw - a.raw) * e,
         swiss: a.swiss + (t.swiss - a.swiss) * e,
-        frm: a.frm + (t.frm - a.frm) * e,
+        top: a.top + (t.top - a.top) * e,
+        bot: a.bot + (t.bot - a.bot) * e,
+        kufe: a.kufe + (t.kufe - a.kufe) * e,
+        bar: a.bar + (t.bar - a.bar) * e,
+        mid: a.mid + (t.mid - a.mid) * e,
       };
       cur.current = w;
       draw(w);
@@ -170,7 +203,7 @@ export function TablePlan({
     // ein Objektliteral hätte bei jedem Rerender eine neue Identität und
     // würde die Schleife ständig neu starten.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [v.len, v.dep, v.raw, v.swiss, v.frm, open]);
+  }, [v.len, v.dep, v.raw, v.swiss, v.top, v.bot, v.kufe, v.bar, v.mid, open]);
 
   const fin = finish === "Gebürstet" ? "brushed" : "sanded";
 
@@ -207,9 +240,11 @@ export function TablePlan({
           <ellipse data-k="shade" fill="url(#plan-shade)" {...s0.shade} />
         </g>
 
-        {/* Die beiden Gestellrahmen, quer unter den Plattenenden */}
-        <Frame i={0} b={s0.base} />
-        <Frame i={1} b={s0.base} />
+        {/* Zwei Rahmen quer unter den Plattenenden — oder ein Kreuzfuß in
+            der Mitte. Beim Wechsel blendet das eine ins andere. */}
+        <Frame i={0} b={s0.base} o={1 - seed.mid} />
+        <Frame i={1} b={s0.base} o={1 - seed.mid} />
+        <Mitte sp={s0.sp} o={seed.mid} />
 
         {/* Platte */}
         <g className="plan__faces">

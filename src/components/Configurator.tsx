@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { TablePlan } from "./TablePlan";
+import { FORMEN } from "./tableGeometry";
 
 /* Alle Optionen und Preise hier stammen aus zwei eigenen Quellen:
  *
@@ -38,9 +39,20 @@ const TONES = [
   { val: "Mittel gebeizt", tone: "#9b836a" },
   { val: "Dunkel gebeizt", tone: "#5f5141" },
 ];
-const FORMS = [
-  { val: "U-Gestell", form: "u", price: 279 },
-  { val: "X-Gestell", form: "a", price: 279 },
+/* Die Gestellwand in Wesel: U-Rahmen, Trapez, A-Bock, V und X-Balken, alle
+   aus schwarzem Flachstahl. Ein Preis steht nur dort, wo wir ihn vom
+   Preisschild haben — U, Trapez und X-Balken. Für A und V ist auf unseren
+   Fotos keine Zahl lesbar; dann bleibt das Feld leer, statt eine zu erfinden.
+   Der Kreuzfuß steht in der Mitte statt an den Enden; beim Wechsel blendet
+   die Vorschau von zwei Rahmen auf einen Fuß um. */
+const FORMS: {
+  val: string; sub: string; form: typeof FORMEN.u; mid: number; price: number | null;
+}[] = [
+  { val: "U-Gestell", sub: "U-100-100", form: FORMEN.u, mid: 0, price: 279 },
+  { val: "Trapez", sub: "40-100", form: FORMEN.trapez, mid: 0, price: 279 },
+  { val: "A-Gestell", sub: "A-Bock", form: FORMEN.a, mid: 0, price: null },
+  { val: "X-Gestell", sub: "X-Balken", form: FORMEN.x, mid: 0, price: 279 },
+  { val: "Kreuzfuß", sub: "Mittelfuß", form: FORMEN.x, mid: 1, price: null },
 ];
 
 /* Geometrie der Zeichnung. Länge steht auf den Preisschildern. Die Tiefe
@@ -61,15 +73,18 @@ const fmt = (n: number) => n.toLocaleString("de-DE");
 export function Configurator() {
   const [s, setS] = useState<{
     size: string; platte: number | null; edge: string; finish: string;
-    ton: string; tone: string; form: string; formPrice: number;
+    ton: string; tone: string; form: string;
   }>({
     size: "200 cm", platte: 855, edge: "Baumkante", finish: "Geschliffen",
-    ton: "Natur", tone: "#c9b394", form: "U-Gestell", formPrice: 279,
+    ton: "Natur", tone: "#c9b394", form: "U-Gestell",
   });
 
-  /* Kein Preis für die größte Platte — dort steht "auf Anfrage" statt einer
-     erfundenen Zahl. */
-  const price = s.platte === null ? null : s.platte + s.formPrice;
+  const f = FORMS.find((x) => x.val === s.form) ?? FORMS[0];
+
+  /* Zwei Stellen, an denen keine Zahl steht: die größte Platte ist "auf
+     Anfrage", und bei zwei Gestellen haben wir keinen Schildpreis. Dann
+     zeigt die Karte, was belegt ist, und sagt den Rest dazu. */
+  const price = s.platte === null || f.price === null ? null : s.platte + f.price;
   const summaryList = [
     "Eiche massiv", s.size, s.edge, s.finish, s.ton, s.form + " · Stahl schwarz",
   ].join(" · ");
@@ -80,7 +95,8 @@ export function Configurator() {
     dep: g.dep,
     raw: s.edge === "Baumkante" ? 1 : 0,
     swiss: s.edge === "Schweizer Kante" ? 1 : 0,
-    frm: s.form === "X-Gestell" ? 1 : 0,
+    ...f.form,
+    mid: f.mid,
   };
 
   /* is-arm schaltet die Ausgangslage der Einmal-Animation, is-seen startet
@@ -222,20 +238,23 @@ export function Configurator() {
               <span className="step__t">Tischgestell</span>
               <span className="step__val">{s.form}</span>
             </div>
-            <div className="opts">
-              {FORMS.map((f) => (
+            <div className="opts size-opts">
+              {FORMS.map((o) => (
                 <button
-                  key={f.val}
-                  className={`opt${s.form === f.val ? " sel" : ""}`}
-                  onClick={() => setS((p) => ({ ...p, form: f.val, formPrice: f.price }))}
+                  key={o.val}
+                  className={`opt${s.form === o.val ? " sel" : ""}`}
+                  onClick={() => setS((p) => ({ ...p, form: o.val }))}
                 >
-                  {f.val}
+                  <b>{o.val}</b>
+                  <span>{o.sub}</span>
                 </button>
               ))}
             </div>
             <p style={{ margin: "14px 0 0", color: "var(--stone)", fontSize: 13 }}>
-              Stahl, schwarz pulverbeschichtet, je 279 €. Ein Trapez-Gestell gibt
-              es zum selben Preis, weitere Gestelle stehen im Markt.
+              Alle aus Flachstahl, schwarz pulverbeschichtet. U-Gestell, Trapez
+              und X-Balken kosten je 279 €; für A-Bock und Kreuzfuß steht der
+              Preis am Schild im Markt. An der Gestellwand in Wesel hängen noch
+              weitere Größen und Formen.
             </p>
           </section>
         </div>
@@ -243,12 +262,27 @@ export function Configurator() {
         <div className="summary">
           <div className="summary__price">
             <div className="lab">Richtpreis</div>
-            <div className="val">{price === null ? "auf Anfrage" : `${fmt(price)} €`}</div>
+            <div className="val">
+              {price !== null ? (
+                `${fmt(price)} €`
+              ) : s.platte !== null ? (
+                <>
+                  {fmt(s.platte)} €
+                  <span className="summary__plus">zzgl. Gestell</span>
+                </>
+              ) : (
+                "auf Anfrage"
+              )}
+            </div>
           </div>
           <div className="summary__list">{summaryList}</div>
           <p style={{ margin: "10px 0 16px", fontSize: 12, opacity: 0.7 }}>
-            Platte plus Gestell, nach unseren Preisschildern. Kein Angebot — den
-            endgültigen Preis machen wir im Markt.
+            {price !== null
+              ? "Platte plus Gestell, nach unseren Preisschildern."
+              : s.platte !== null
+                ? "Platte nach unserem Preisschild. Für dieses Gestell steht der Preis am Schild im Markt."
+                : "Platte und Gestell besprechen wir im Markt."}{" "}
+            Kein Angebot — den endgültigen Preis machen wir im Markt.
           </p>
           <Link
             href="/standorte"

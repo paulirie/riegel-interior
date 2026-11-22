@@ -598,6 +598,11 @@ image-slot{
 .plan__brush{ opacity:var(--brush-o); transition:opacity .6s var(--ease); }
 .plan__knot{ fill:#43301c; fill:color-mix(in oklab, var(--top) 44%, #241708);
   opacity:.34; transition:fill .6s var(--ease); }
+/* Wo wir für ein Gestell keinen Schildpreis haben, steht unter der Zahl der
+   Platte, dass das Gestell noch dazukommt — statt einer erfundenen Summe. */
+.summary__plus{ display:block; margin-top:7px; font-family:var(--sans);
+  font-size:11px; letter-spacing:.2em; text-transform:uppercase; opacity:.62; }
+
 .plan__dimline{ fill:none; stroke:var(--mist); stroke-width:1; vector-effect:non-scaling-stroke; }
 .plan__help{ fill:none; stroke:var(--mist); stroke-width:1; stroke-opacity:.45;
   stroke-dasharray:4 5; vector-effect:non-scaling-stroke; }

@@ -36,7 +36,22 @@ export const SAMPLES = 96;             // Stützpunkte je Längskante — immer 
                                        // (die schnellste Schwingung ist 9,1 Perioden
                                        // lang, das sind rund 10 Punkte je Periode)
 
-export type Vec = { len: number; dep: number; raw: number; swiss: number; frm: number };
+/* Der Zustand der Zeichnung. Alles sind Zahlen, damit der Tween sie
+   einzeln interpolieren kann — auch die Gestellform. */
+export type Vec = {
+  len: number; dep: number; raw: number; swiss: number;
+  /** halber Strebenabstand oben, als Anteil der vollen Spannweite */
+  top: number;
+  /** dasselbe unten; negativ heisst, die Streben haben die Seiten getauscht */
+  bot: number;
+  /** Kufe am Boden, 0..1 */
+  kufe: number;
+  /** Querriegel auf halber Hoehe, 0..1 */
+  bar: number;
+  /** Ueberblendung zum Mittelfuss-Kreuzgestell: 0 = zwei Rahmen an den
+      Enden, 1 = ein Kreuzfuss in der Mitte */
+  mid: number;
+};
 
 const r = (n: number) => Math.round(n * 10) / 10;
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
@@ -232,18 +247,29 @@ export function mitre(v: Vec) {
 }
 
 /* ── Gestell ──────────────────────────────────────────────────────────────
-   Zwei Rahmen, je einer unter jedem Plattenende, beide quer zum Tisch —
-   so stehen sie auch im Markt. Jeder Rahmen ist dasselbe Gebilde: eine
-   Traverse oben, zwei Flachstahl-Streben, unten eine Kufe. Ein Skalar frm
-   fährt von 0 nach 1: die Füße wandern dabei auf die jeweils andere Seite.
-   frm = 0 → beide Streben senkrecht, Kufe durchgehend: U-100-100.
-   frm = 1 → die Streben haben die Seiten getauscht und kreuzen sich in der
-   Mitte, aus der Kufe sind zwei Füße geworden: X-Balken-Set.
-   Dazwischen steht ein V — eine Bewegung, kein Umschalter.               */
-const RAIL_H = 6;                      // cm Höhe der oberen Traverse
+   An der Wand in Wesel hängt eine ganze Reihe Untergestelle, und sie sind
+   eine Familie: oben eine Montageplatte, darunter zwei Streben aus
+   Flachstahl, unten je nach Modell eine durchgehende Kufe oder zwei
+   Einzelfüße, beim A-Bock dazu ein Querriegel. Was sie unterscheidet,
+   sind vier Zahlen — wie weit die Streben oben auseinanderstehen, wie weit
+   unten, ob eine Kufe da ist, ob ein Riegel quer liegt. Deshalb ist der
+   Wechsel zwischen ihnen eine Bewegung und kein Umschalter.
+
+     U-100-100   oben wie unten voll, Kufe am Boden
+     Trapez      oben 40 cm, unten 100 cm
+     A-Gestell   oben fast zusammengelaufen, Querriegel
+     V-Gestell   oben 100 cm, unten 40 cm
+     X-Balken    die Streben tauschen die Seiten und kreuzen sich
+
+   Beide Rahmen stehen quer zum Tisch, je einer unter einem Plattenende —
+   so stehen sie auch im Markt.                                            */
+const RAIL_H = 6;                      // cm Höhe der oberen Montageplatte
+const RAIL_OUT = 3;                    // cm Überstand der Platte je Seite
 const LEG_W = 10;                      // cm Breite des Flachstahls (100er Flachstahl)
 const FOOT_H = 5;                      // cm Höhe von Kufe und Füßen
-const FOOT_L = 15;                     // cm Länge eines Einzelfußes im X
+const FOOT_L = 15;                     // cm Länge eines Einzelfußes
+const BAR_H = 5;                       // cm Höhe des Querriegels am A-Bock
+const BAR_Z = 0.42;                    // Anteil der Strebenhöhe, auf der er sitzt
 const BASE_W = 100;                    // cm Spannweite laut Preisschild (U-100-100)
 const FRAME_IN = 7;                    // cm Rücksprung der Rahmen von der Plattenkante
 /* Materialstärke des Flachstahls. Sie liegt quer zur Rahmenebene, also
@@ -252,24 +278,56 @@ const FRAME_IN = 7;                    // cm Rücksprung der Rahmen von der Plat
 export const TKX = 2.6;                // cm
 export const TKDX = Math.round(TKX * K * 10) / 10;
 
+export type Form = { top: number; bot: number; kufe: number; bar: number };
+/* Die Zahlen sind an den Preisschildern und an der Gestellwand abgenommen.
+   top/bot sind Anteile der vollen Spannweite: Trapez 40-100 heißt oben 40
+   von 100, also ein Drittel. */
+export const FORMEN: Record<string, Form> = {
+  u:      { top: 1,     bot:  1, kufe: 1, bar: 0 },
+  trapez: { top: 1 / 3, bot:  1, kufe: 0, bar: 0 },
+  a:      { top: 0.12,  bot:  1, kufe: 0, bar: 1 },
+  x:      { top: 1,     bot: -1, kufe: 0, bar: 0 },
+};
+/* Auf der Gestellwand hängt auch eine Form, die wie ein V aussieht — oben
+   breit, unten schmal. Die steht hier NICHT: an einer Wand hängt ein Trapez
+   auf dem Kopf genauso, und kein Preisschild auf unseren Fotos nennt ein
+   V-Gestell. Gibt es eins, ist es eine Zeile. */
+
 export function base(v: Vec) {
   const halfL = Math.max(v.len / 2 - INSET, 15);
   const span = Math.min(BASE_W, Math.max(v.dep - 2 * FRAME_IN, 42));
   const yc = v.dep / 2;
   const a = span / 2 - LEG_W / 2;            // Abstand Strebenmitte von der Rahmenmitte
   const hz = HT - RAIL_H;                    // Höhe, über die die Strebe läuft
+  const tA = a * v.top;
+  const bA = a * v.bot;
   const legs = [-1, 1].map((sg) => {
-    const yT = yc + sg * a;
-    const yF = yc + sg * a * (1 - 2 * v.frm);
+    const yT = yc + sg * tA;
+    const yF = yc + sg * bA;
+    /* Die Strebe steht schräg; damit sie überall gleich breit aussieht,
+       wird ihre waagerechte Breite um den Neigungswinkel aufgeweitet. */
     const hw = (LEG_W / 2) / Math.cos(Math.atan((yT - yF) / hz));
     return { yT, yF, hw };
   });
+  const barZ = BAR_Z * hz;
+  const bY = legs.map((q) => q.yF + (q.yT - q.yF) * (barZ / hz));
+  const lo = Math.min(bY[0], bY[1]) + legs[0].hw * 0.9;
+  const hi = Math.max(bY[0], bY[1]) - legs[1].hw * 0.9;
+  const kufeHalf = Math.abs(bA);
   return {
     xs: [v.len / 2 - halfL, v.len / 2 + halfL],
-    y0: yc - span / 2, span, legs,
-    /* die Kufe weicht, sobald die Streben zu kreuzen beginnen */
-    kufeO: Math.round((1 - clamp01(v.frm / 0.42)) * 100) / 100,
-    yc,
+    yc, legs,
+    railY: r(yc - tA - LEG_W / 2 - RAIL_OUT),
+    railW: r(2 * tA + LEG_W + 2 * RAIL_OUT),
+    kufeY: r(yc - kufeHalf - LEG_W / 2),
+    kufeW: r(2 * kufeHalf + LEG_W),
+    barY: r(lo),
+    barW: r(Math.max(hi - lo, 0)),
+    barZ: r(barZ),
+    /* Wo eine Kufe liegt, braucht es keine Einzelfüße — und umgekehrt. */
+    kufeO: Math.round(clamp01(v.kufe) * 100) / 100,
+    footO: Math.round(clamp01(1 - v.kufe) * 100) / 100,
+    barO: Math.round(clamp01(v.bar) * 100) / 100,
   };
 }
 export type Base = ReturnType<typeof base>;
@@ -277,16 +335,64 @@ export type Base = ReturnType<typeof base>;
 export const rectPath = (x: number, y: number, w: number, h: number) =>
   `M${r(x)},${r(y)}L${r(x + w)},${r(y)}L${r(x + w)},${r(y + h)}L${r(x)},${r(y + h)}Z`;
 /* Die Montageplatte steht an beiden Seiten ein Stück über die Streben
-   hinaus — auf dem Foto aus Wesel gut zu sehen. */
-const RAIL_OUT = 3;
-export const railPath = (b: Base) =>
-  rectPath(b.y0 - RAIL_OUT, HT - RAIL_H, b.span + 2 * RAIL_OUT, RAIL_H);
-export const kufePath = (b: Base) => rectPath(b.y0, 0, b.span, FOOT_H);
+   hinaus — auf dem Foto von der Gestellwand gut zu sehen. */
+export const railPath = (b: Base) => rectPath(b.railY, HT - RAIL_H, b.railW, RAIL_H);
+export const kufePath = (b: Base) => rectPath(b.kufeY, 0, b.kufeW, FOOT_H);
+export const barPath = (b: Base) => rectPath(b.barY, b.barZ, b.barW, BAR_H);
 export const legPath = (q: Base["legs"][number]) =>
   `M${r(q.yT - q.hw)},${HT - RAIL_H}L${r(q.yT + q.hw)},${HT - RAIL_H}` +
   `L${r(q.yF + q.hw)},0L${r(q.yF - q.hw)},0Z`;
 export const footPath = (q: Base["legs"][number]) =>
   rectPath(q.yF - FOOT_L / 2, 0, FOOT_L, FOOT_H);
+
+/* ── Mittelfuß-Kreuzgestell ───────────────────────────────────────────────
+   Die Reihe auf der Bank vor der Gestellwand: kein Rahmen an jedem Ende,
+   sondern ein Fuß in der Mitte. Von einem Knoten auf halber Höhe laufen
+   vier Arme nach oben-außen unter die Platte und vier nach unten-außen auf
+   den Boden — von der Seite ein X, von oben ein Kreuz.
+
+   Das passt in keine der beiden Ebenen-Matrizen, weil die Arme schräg
+   durch den Raum laufen. Deshalb hier als echte Vierecke: zwei Punkte in
+   Zentimetern, Breite waagerecht quer zur Laufrichtung, vier Ecken durch
+   p() projiziert.                                                         */
+const SP_AX = 42;                      // cm, halbe Spannweite längs
+const SP_W = 9;                        // cm, Breite des Flachstahls
+
+function bar3(
+  q0: [number, number, number],
+  q1: [number, number, number],
+  w: number,
+) {
+  const dx = q1[0] - q0[0], dy = q1[1] - q0[1];
+  const L = Math.hypot(dx, dy) || 1;
+  const nx = (-dy / L) * (w / 2), ny = (dx / L) * (w / 2);
+  const c = [
+    p(q0[0] + nx, q0[1] + ny, q0[2]), p(q1[0] + nx, q1[1] + ny, q1[2]),
+    p(q1[0] - nx, q1[1] - ny, q1[2]), p(q0[0] - nx, q0[1] - ny, q0[2]),
+  ];
+  return "M" + c.map((e) => `${r(e[0])},${r(e[1])}`).join("L") + "Z";
+}
+
+export function spider(v: Vec) {
+  const cx = v.len / 2, cy = v.dep / 2;
+  const ax = Math.max(Math.min(SP_AX, v.len / 2 - 16), 18);
+  const ay = Math.max(Math.min(v.dep / 2 - FRAME_IN, 34), 15);
+  const hz = HT - RAIL_H;
+  const zc = r(hz * 0.52);                     // Höhe des Knotens
+  /* Hinten zuerst, vorn zuletzt — sonst stimmt die Verdeckung nicht. */
+  const ecken: [number, number][] = [[-1, 1], [1, 1], [-1, -1], [1, -1]];
+  const arme = ecken.flatMap(([sx, sy]) => [
+    bar3([cx, cy, zc], [cx + sx * ax, cy + sy * ay, 0], SP_W),
+    bar3([cx, cy, zc], [cx + sx * ax, cy + sy * ay, hz], SP_W),
+  ]);
+  /* Das Montagekreuz oben, zwei flache Balken über die Diagonalen. */
+  const kreuz = [
+    bar3([cx - ax, cy - ay, hz], [cx + ax, cy + ay, hz], SP_W),
+    bar3([cx - ax, cy + ay, hz], [cx + ax, cy - ay, hz], SP_W),
+  ];
+  return { arme, kreuz };
+}
+export type Spider = ReturnType<typeof spider>;
 
 /** Maßlinie der Länge, in der Bodenebene vor dem Tisch. */
 export function dimLen(v: Vec) {
