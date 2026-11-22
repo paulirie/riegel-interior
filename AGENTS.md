@@ -106,3 +106,24 @@ ausdrücklich nennt.
 * Es gibt **keine Online-Bestellung** und **keine Nutzerkonten**. Kein
   Warenkorb, kein Merkzettel, kein „Vorbestellen".
 
+
+## Konfigurator — was die Zeichnung zeigen darf
+
+Der Konfigurator bepreist die **NaturLine**-Platte. Beleg: das Preisschild
+auf `public/img/detail-platten.jpg` — „Tischplatte NaturLine Eiche 200/4 cm
+vollmassiv, 1099 → 855,-" ist genau der Vorgabepreis in `Configurator.tsx`.
+
+- Die NaturLine besteht aus **durchgehenden Brettern** von 9–16 cm, längs,
+  selten gestoßen, und hat **keinen Fries**. Wer einen Fries einzeichnet,
+  zeichnet die Altholzplatte — ein anderes Stück, das hier nicht zur Wahl steht.
+- Gestelle kommen von der Gestellwand in Wesel (Foto 8 der Anzeige
+  „Tisch nach Wunsch"): U-100-100, Trapez 40-100, A-Bock, X-Balken,
+  Mittelfuß-Kreuzgestell. Eine Form, die wie ein V aussieht, hängt dort auch —
+  die steht nicht in der Liste, weil ein Trapez auf dem Kopf genauso aussieht
+  und kein Schild ein V-Gestell nennt.
+- **Preise nur vom Schild.** U, Trapez und X-Balken sind mit 279 € belegt.
+  Wo kein Schild lesbar ist, bleibt `price: null`; der Richtpreis zeigt dann
+  die Platte und „zzgl. Gestell". Keine Zahl schätzen, auch keine plausible.
+- Maße am Gestell werden **am Foto nachgemessen**, Bezug ist die Tischhöhe
+  von 72 cm. Namen wie „U-100-100" sind keine Maßangabe: nachgemessen ist
+  der Rahmen 66–69 cm breit und der Flachstahl rund 6 cm.
