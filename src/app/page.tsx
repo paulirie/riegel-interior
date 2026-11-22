@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WESEL, SCHERMBECK, HALTERN } from "@/data/kontakt";
 import { ImageSlot } from "@/components/ImageSlot";
 import { ManufakturVideo } from "@/components/ManufakturVideo";
 import { Ticker } from "@/components/Ticker";
@@ -276,7 +277,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="loc-grid">
-            <Link href="/standorte" className="loc loc--hero" data-reveal="">
+            <Link href={WESEL.anker} className="loc loc--hero" data-reveal="">
               <div className="loc__img par">
                 <ImageSlot
                   src="/img/standort-wesel.jpg"
@@ -290,7 +291,7 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-            <Link href="/standorte" className="loc" data-reveal="" data-reveal-delay="1">
+            <Link href={SCHERMBECK.anker} className="loc" data-reveal="" data-reveal-delay="1">
               <div className="loc__img par">
                 {/* TODO: echtes Foto aus dem Lagerverkauf Schermbeck — die
                     ehemaligen Bundeswehrhallen sehen anders aus als unsere
@@ -302,7 +303,7 @@ export default function Home() {
                 </div>
               </div>
             </Link>
-            <Link href="/standorte" className="loc" data-reveal="" data-reveal-delay="2">
+            <Link href={HALTERN.anker} className="loc" data-reveal="" data-reveal-delay="2">
               <div className="loc__img par">
                 {/* TODO: echtes Foto aus Haltern am See — aktuell Platzhalter aus dem Bildarchiv */}
                 <ImageSlot

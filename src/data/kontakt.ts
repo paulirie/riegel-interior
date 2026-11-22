@@ -1,68 +1,73 @@
 /* Kontaktwege, die aus dem Shop heraus angeboten werden.
  *
- * REGEL (siehe CLAUDE.md): Der Standort eines Stücks kommt aus seiner
- * Anzeige, nicht aus dem Bauch. Jedes Stück zeigt die Nummer genau des
- * Marktes, in dem es steht, und verlinkt diesen Markt auf /standorte.
- */
-
-/**
- * WhatsApp.
+ * REGEL (siehe AGENTS.md, Abschnitt "Riegel Interior — Regeln für das
+ * Sortiment"): Der Standort eines Stücks kommt aus seiner Anzeige. Jedes
+ * Stück zeigt die Nummer genau des Marktes, in dem es steht, und verlinkt
+ * diesen Markt auf /standorte. Steht ein Stück in keinem unserer Märkte,
+ * nennt die Karte weder Markt noch Marktnummer.
  *
- * e164 ist absichtlich leer: Es ist nicht bestätigt, über welche Nummer
- * WhatsApp läuft. Keines der 196 Kleinanzeigen-Inserate erwähnt WhatsApp,
- * riegel-interior.de auch nicht. Das Kleinanzeigen-Profil führt als zweiten
- * Kontakt die Mobilnummer 0162 572 7008 — naheliegend, aber geraten, und eine
- * geratene Nummer würde Kundennachrichten zu einem Fremden schicken.
- *
- * Solange e164 leer ist, zeigt die Produktkarte "Anrufen" mit der Nummer des
- * jeweiligen Marktes. Sobald die richtige Nummer feststeht, hier eintragen —
- * internationales Format ohne + und ohne führende 0, also z. B.
- * "491625727008" für 0162 572 7008. Der WhatsApp-Knopf erscheint dann von
- * selbst, samt vorausgefüllter Nachricht. Sonst ist nichts zu ändern.
+ * Dies ist die einzige Datei im Projekt, in der eine Telefonnummer, eine
+ * Mailadresse oder eine Sprungmarke steht.
  */
-export const WHATSAPP = {
-  e164: "",
-  display: "",
-};
 
 export type Markt = {
-  /** so, wie der Standort in site.ts steht */
-  key: string;
   /** Kurzname für den Satz "Steht in …" */
   kurz: string;
   nummer: string;
+  /** tel:-Ziel, E.164 ohne Leerzeichen */
   tel: string;
+  mail: string;
   /** Sprungmarke auf /standorte */
   anker: string;
-  mail: string;
+  /**
+   * WhatsApp dieses Marktes, international ohne + und ohne führende 0
+   * (z. B. "491625727008"), oder "" wenn keine bestätigt ist.
+   *
+   * Bewusst je Markt und nicht einmal global: ein globaler Schalter würde
+   * auf allen Karten die marktgenaue Nummer durch eine einzige ersetzen und
+   * damit genau die Zuordnung aufheben, um die es hier geht. Gibt es eine
+   * Nummer fürs ganze Haus, trägt man sie eben bei allen dreien ein.
+   *
+   * Noch leer: keines der 196 Inserate nennt WhatsApp, riegel-interior.de
+   * auch nicht. Das Kleinanzeigen-Profil führt als zweiten Kontakt die
+   * Mobilnummer 0162 572 7008 — naheliegend, aber geraten, und eine
+   * geratene Nummer schickt Kundennachrichten zu einem Fremden. Sobald die
+   * richtige feststeht, hier eintragen; der WhatsApp-Knopf erscheint dann
+   * von selbst, samt vorausgefüllter Nachricht.
+   */
+  whatsapp: string;
 };
 
 export const WESEL: Markt = {
-  key: "Wesel", kurz: "Wesel",
-  nummer: "0281 147 93 270", tel: "+4928114793270", anker: "/standorte#wesel",
-  mail: "shop@riegel-interior.com",
+  kurz: "Wesel",
+  nummer: "0281 147 93 270", tel: "+4928114793270",
+  mail: "shop@riegel-interior.com", anker: "/standorte#wesel", whatsapp: "",
 };
 export const SCHERMBECK: Markt = {
-  key: "Lagerverkauf Schermbeck", kurz: "Schermbeck",
-  /* Der Lagerverkauf hängt an derselben Leitung wie Wesel — eine eigene
-     Nummer nennt weder die Seite noch ein Inserat. */
-  nummer: "0281 147 93 270", tel: "+4928114793270", anker: "/standorte#schermbeck",
-  mail: "shop@riegel-interior.com",
+  kurz: "Schermbeck",
+  /* Der Lagerverkauf hängt an derselben Leitung wie Wesel. Eine eigene
+     Nummer nennt weder unsere Seite noch ein Inserat — also keine erfinden. */
+  nummer: "0281 147 93 270", tel: "+4928114793270",
+  mail: "shop@riegel-interior.com", anker: "/standorte#schermbeck", whatsapp: "",
 };
 export const HALTERN: Markt = {
-  key: "Haltern am See", kurz: "Haltern am See",
-  nummer: "02364 50 99 515", tel: "+4923645099515", anker: "/standorte#haltern",
-  mail: "haltern@riegel-interior.com",
+  kurz: "Haltern am See",
+  nummer: "02364 50 99 515", tel: "+4923645099515",
+  mail: "haltern@riegel-interior.com", anker: "/standorte#haltern", whatsapp: "",
 };
 
-export const MAERKTE = [WESEL, SCHERMBECK, HALTERN];
+/** Reihenfolge wie auf /standorte. Fußzeile und Standorte-Seite lesen hieraus. */
+export const MAERKTE: Markt[] = [WESEL, SCHERMBECK, HALTERN];
 
 /**
  * Der Markt zu einem Standort aus site.ts.
  *
- * Gibt null zurück, wenn der Standort keiner unserer drei Märkte ist — dann
- * nennt die Karte bewusst keinen Markt, statt den falschen zu nennen. Betrifft
- * aktuell nur die beiden Stücke, deren Anzeige Dorsten nennt.
+ * Gibt null zurück, wenn der Standort keiner unserer drei Märkte ist. Die
+ * Karte nennt dann bewusst weder Markt noch Marktnummer, statt den falschen
+ * zu nennen — betrifft aktuell die beiden Stücke, deren Anzeige Dorsten
+ * nennt. Es gibt hier absichtlich KEINEN Rückfall auf Wesel: ein stiller
+ * Rückfall würde eine Nummer ausliefern, deren Markt die Karte gerade
+ * verschweigt.
  */
 export function marktFuer(loc?: string): Markt | null {
   if (!loc) return null;
@@ -72,9 +77,5 @@ export function marktFuer(loc?: string): Markt | null {
   return null;
 }
 
-/** Fällt auf Wesel zurück — nur für Telefon/Mail, nie für eine Ortsangabe. */
-export function telFuer(loc?: string) {
-  return marktFuer(loc) ?? WESEL;
-}
-
-export const MAIL = "shop@riegel-interior.com";
+/** Hauptadresse des Hauses — für alles ohne Produktbezug. */
+export const MAIL = WESEL.mail;

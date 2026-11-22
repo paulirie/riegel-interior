@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { WESEL, SCHERMBECK, HALTERN, MAIL } from "@/data/kontakt";
+import { MAERKTE, WESEL, MAIL } from "@/data/kontakt";
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
@@ -28,9 +28,13 @@ export function SiteFooter() {
           <div>
             <h4>Standorte</h4>
             <ul>
-              <li><Link href={WESEL.anker}>Wesel — Flagship</Link></li>
-              <li><Link href={SCHERMBECK.anker}>Schermbeck</Link></li>
-              <li><Link href={HALTERN.anker}>Haltern am See</Link></li>
+              {MAERKTE.map((m) => (
+                <li key={m.anker}>
+                  <Link href={m.anker}>
+                    {m === WESEL ? "Wesel — Flagship" : m.kurz}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>

@@ -4,30 +4,47 @@ import { useState } from "react";
 import Link from "next/link";
 import { PRODUCTS, FILTERS } from "@/data/site";
 import { ImageSlot } from "./ImageSlot";
-import { WHATSAPP, marktFuer, telFuer } from "@/data/kontakt";
+import { MAIL, marktFuer, type Markt } from "@/data/kontakt";
 
 /**
  * Zweite Schaltfläche der Karte: der direkte Draht in den Markt, in dem das
  * Stück steht.
  *
- * Solange keine WhatsApp-Nummer bestätigt ist, steht dort "Anrufen" mit der
- * Nummer genau dieses Marktes. Sobald WHATSAPP.e164 gesetzt ist, wird daraus
- * von selbst der WhatsApp-Knopf mit vorausgefüllter Nachricht — damit nicht
- * jeder mit "Hallo?" anfangen muss.
+ * Solange für diesen Markt keine WhatsApp-Nummer bestätigt ist, steht dort
+ * "Anrufen" mit seiner Telefonnummer. Sobald in kontakt.ts eine eingetragen
+ * ist, wird daraus der WhatsApp-Knopf mit vorausgefüllter Nachricht — damit
+ * nicht jeder mit "Hallo?" anfangen muss.
+ *
+ * Ohne Markt wird KEINE Marktnummer angeboten. Die Karte verschweigt dann
+ * ja gerade den Standort; eine Nummer dazuzulegen hieße, jemanden in einen
+ * Markt zu schicken, in dem das Stück nicht steht. Stattdessen die Mail.
  */
-function frageCta(name: string, loc?: string) {
-  if (WHATSAPP.e164) {
-    const text = `Hallo! Ich interessiere mich für „${name}“${
-      loc ? ` (${loc})` : ""
-    }. Ist das Stück noch da?`;
+function frageCta(name: string, markt: Markt | null) {
+  const frage = `Hallo! Ich interessiere mich für „${name}“${
+    markt ? ` (${markt.kurz})` : ""
+  }. Ist das Stück noch da?`;
+  if (!markt) {
     return {
-      label: "Per WhatsApp fragen",
-      href: `https://wa.me/${WHATSAPP.e164}?text=${encodeURIComponent(text)}`,
+      label: "Per Mail fragen",
+      aria: `Per Mail nach „${name}“ fragen`,
+      href: `mailto:${MAIL}?subject=${encodeURIComponent(`Anfrage: ${name}`)}`,
+      extern: false,
+    };
+  }
+  if (markt.whatsapp) {
+    return {
+      label: `Per WhatsApp fragen · ${markt.kurz}`,
+      aria: `${markt.kurz} per WhatsApp wegen „${name}“ fragen (öffnet in neuem Tab)`,
+      href: `https://wa.me/${markt.whatsapp}?text=${encodeURIComponent(frage)}`,
       extern: true,
     };
   }
-  const t = telFuer(loc);
-  return { label: `Anrufen · ${t.nummer}`, href: `tel:${t.tel}`, extern: false };
+  return {
+    label: `Anrufen · ${markt.nummer}`,
+    aria: `${markt.kurz} anrufen wegen „${name}“, ${markt.nummer}`,
+    href: `tel:${markt.tel}`,
+    extern: false,
+  };
 }
 
 export function ShopGrid() {
@@ -103,14 +120,17 @@ export function ShopGrid() {
                   {p.sub && <p className="prod__sub">{p.sub}</p>}
 
                   <button
+                    type="button"
                     className="prod__toggle"
                     aria-expanded={isOpen}
+                    aria-controls={`detail-${p.id}`}
                     onClick={() => setOpen((o) => ({ ...o, [p.id]: !o[p.id] }))}
                   >
                     {isOpen ? "Weniger anzeigen " : "Mehr erfahren "}
-                    <span className="ic">+</span>
+                    <span className="ic" aria-hidden="true">+</span>
+                    <span className="sr-only">zu {p.name}</span>
                   </button>
-                  <div className="prod__detail">
+                  <div className="prod__detail" id={`detail-${p.id}`}>
                     <div>
                       <dl>
                         {/* Eckdaten aus der Anzeige; fehlt die Liste, bleibt
@@ -141,7 +161,7 @@ export function ShopGrid() {
                           ansehen, oder genau diesen Markt anrufen. */}
                       {(() => {
                         const markt = marktFuer(p.loc);
-                        const cta = frageCta(p.name, p.loc);
+                        const cta = frageCta(p.name, markt);
                         return (
                           <>
                             {markt && (
@@ -157,8 +177,10 @@ export function ShopGrid() {
                                   href={p.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
+                                  aria-label={`Ganze Anzeige für „${p.name}“ ansehen (öffnet in neuem Tab)`}
                                 >
-                                  Ganze Anzeige ansehen <span className="arr">↗</span>
+                                  Ganze Anzeige ansehen{" "}
+                                  <span className="arr" aria-hidden="true">↗</span>
                                 </a>
                               )}
                               {/* Die drei Stücke von den Preisschildern haben keine
@@ -172,6 +194,7 @@ export function ShopGrid() {
                                     : "btn btn--sm btn--solid prod__cta-main"
                                 }
                                 href={cta.href}
+                                aria-label={cta.aria}
                                 {...(cta.extern
                                   ? { target: "_blank", rel: "noopener noreferrer" }
                                   : {})}

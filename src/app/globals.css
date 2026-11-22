@@ -119,6 +119,13 @@ em,.italic{ font-style:italic; }
 }
 .btn:hover{ background:var(--ink); color:var(--bone); }
 .btn:active{ transform:translateY(1px); }
+/* Eigener Fokusring: alle Zustände hingen bisher an :hover, mit der
+   Tastatur sah man also nichts außer dem Browser-Standardring — und der
+   verschwindet auf dem fast schwarzen .btn--solid. */
+.btn:focus-visible,
+.prod__ort a:focus-visible,
+.prod__toggle:focus-visible{ outline:2px solid var(--ink); outline-offset:3px; }
+.dark .btn:focus-visible{ outline-color:var(--bone); }
 .btn .arr{ transition:transform .5s var(--ease); }
 .btn:hover .arr{ transform:translateX(5px); }
 
@@ -455,7 +462,7 @@ image-slot{
   background:var(--ink); color:var(--bone); }
 .prod__flag--quiet{ background:rgba(250,248,244,.92); color:var(--graphite); font-weight:500; }
 
-.prod__body{ container:prodbody / inline-size; padding:22px 22px 24px; display:flex; flex-direction:column; gap:4px; }
+.prod__body{ padding:22px 22px 24px; display:flex; flex-direction:column; gap:4px; }
 .prod__brand{ font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--mist); margin-bottom:5px; }
 .prod__row{ display:flex; justify-content:space-between; align-items:baseline; gap:14px; }
 .prod__name{ font-family:var(--serif); font-size:clamp(20px,1.6vw,25px); font-weight:400; line-height:1.1; }
@@ -489,32 +496,40 @@ image-slot{
 .spec dt{ flex:0 0 96px; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--stone); }
 .spec dd{ font-size:14px; color:var(--ink); }
 .spec--maße dd{ font-family:var(--serif); font-size:17px; }
-/* "Steht in Wesel" — der Markt ist verlinkt und führt auf seine Seite. */
+/* "Steht in Wesel" — der Markt ist verlinkt und führt auf seine Seite.
+   inline-block mit Polsterung, damit der Daumen ihn trifft und nicht den
+   Knopf darunter; der negative Rand hält die Zeile optisch an ihrem Platz. */
 .prod__ort{ margin-top:16px; font-size:12px; letter-spacing:.1em;
   text-transform:uppercase; color:var(--stone); }
-.prod__ort a{ color:var(--ink); border-bottom:1px solid var(--ink);
-  padding-bottom:2px; transition:opacity .3s var(--ease); }
+.prod__ort a{ display:inline-block; color:var(--ink);
+  border-bottom:1px solid var(--ink); padding:5px 2px 2px;
+  margin:-5px -2px -2px; transition:opacity .3s var(--ease); }
 .prod__ort a:hover{ opacity:.6; }
 
 /* Zwei Wege aus der Karte heraus, unterschiedlich laut: die ganze Anzeige
-   ist das Hauptziel und bekommt die volle Breite der ersten Zeile; der
-   Anruf steht als heller Knopf daneben. Unter 420 px untereinander. */
-.prod__cta{ display:flex; flex-wrap:wrap; gap:9px; margin-top:12px; }
-.prod__cta-main{ flex:1 1 100%; justify-content:center; font-weight:600;
-  padding-block:16px; letter-spacing:.17em; }
-.prod__cta-side{ flex:1 1 100%; justify-content:center;
-  background:var(--bone); border-color:var(--line); color:var(--ink); }
-.prod__cta-side:hover{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
-/* Nebeneinander, sobald die Karte breit genug ist, dass beide Beschriftungen
-   einzeilig bleiben — das hängt an der Karte, nicht am Fenster, denn das
-   Raster hat je nach Breite ein bis drei Spalten. Darunter untereinander,
-   beide über die volle Breite. */
-@container prodbody (min-width: 440px){
-  .prod__cta-main{ flex:1 1 56%; }
-  .prod__cta-side{ flex:1 1 0; white-space:nowrap; }
-}
+   ist das Hauptziel, der Anruf steht als heller Knopf daneben. */
+.prod__cta{ display:flex; flex-wrap:wrap; gap:9px; margin-top:16px; }
+.prod__cta-main{ flex:1 1 100%; justify-content:center; }
+.prod__cta-side{ flex:1 1 100%; justify-content:center; }
+/* Der helle Knopf darf NICHT die Farbe der Karte haben (--bone), sonst
+   begrenzt ihn nur eine 1,4:1-Linie und er liest sich wie Fließtext.
+   Weiß auf Bone plus kräftigerer Rahmen bringt die Begrenzung über 3:1. */
+.prod__cta-side{ background:#fff; border-color:rgba(12,11,10,.42); color:var(--ink); }
+.prod__cta-side:hover,
+.prod__cta-side:focus-visible{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
 .btn--sm{ padding:13px 20px; font-size:11px; }
 .btn--block{ flex:1; justify-content:center; }
+/* NACH .btn--sm, sonst überschreibt dessen Kurzschreibweise das padding
+   wieder und der Hauptknopf wäre genauso hoch wie der helle. */
+.btn--sm.prod__cta-main{ padding:18px 20px; font-weight:600; letter-spacing:.17em; }
+/* Keine Regel fürs Nebeneinanderstellen, weil es rechnerisch nicht aufgeht:
+   "Ganze Anzeige ansehen ↗" braucht einzeilig rund 285 px, der Anrufknopf
+   mit ausgeschriebener Rufnummer rund 245 px, zusammen 539 px. Im Raster ist eine Karte
+   innen 368 px breit (drei Spalten), 396 px (zwei) und höchstens 512 px
+   (eine) — in keinem Fall genug. Sie stehen deshalb untereinander, und die
+   Rangfolge trägt die Gestalt: der Hauptknopf ist dunkel, fett und 56 px
+   hoch, der helle 46 px. Wer sie doch nebeneinander will, muss eine der
+   beiden Beschriftungen kürzen. */
 
 /* ===================== konfigurator.html ===================== */
 .cfg{ display:grid; grid-template-columns:1.15fr .85fr; min-height:100svh; }

@@ -39,7 +39,19 @@ Daraus wird gesetzt:
 | Dorsten, Düsseldorf, sonstiges | **kein `loc`** — lieber keinen Markt nennen als den falschen |
 
 Steht dort „Bestellbar" statt „Sofort verfügbar", kommt zusätzlich
-`bestell: true` dazu.
+`bestell: true` dazu. Die Karte schreibt dann „Bestellbar über <Markt>"
+statt „Steht in <Markt>", und das Schildchen auf dem Foto heißt
+„Auf Anfrage" statt „Im Markt verfügbar".
+
+`url` zeigt **immer** auf das Kleinanzeigen-Inserat (`www.kleinanzeigen.de`).
+eBay wird nicht mehr bespielt und nie verlinkt — dort stehen null Anzeigen.
+
+Stücke **ohne** Anzeige gibt es auch: die Konfigurator-Teile von den
+Preisschildern im Weseler Markt (`gestell-u`, `gestell-x`,
+`tischplatte-eiche`). Bei denen bleibt `url` weg — dann wird der Anruf von
+selbst zum dunklen Hauptknopf, statt dass ein einzelner heller Knopf
+dasteht. `loc` ist in dem Fall der Markt, in dem das Preisschild hängt.
+Niemals eine Inserats-URL erfinden.
 
 ### Telefonnummer und Verlinkung folgen daraus von selbst
 
@@ -50,9 +62,19 @@ richtigen. Die Karte zeigt dann:
 * **„Steht in <Markt>"** — der Markt verlinkt auf `/standorte#wesel`,
   `#schermbeck` oder `#haltern`.
 * **„Ganze Anzeige ansehen"** als kräftiger Hauptknopf auf `p.url`.
-* **„Anrufen · <Nummer des Marktes>"** als heller Knopf daneben. Sobald in
-  `kontakt.ts` eine WhatsApp-Nummer eingetragen ist, wird daraus von selbst
+* **„Anrufen · <Nummer des Marktes>"** als heller Knopf daneben. Sobald bei
+  diesem Markt eine WhatsApp-Nummer eingetragen ist, wird daraus von selbst
   der WhatsApp-Knopf.
+
+**Ohne `loc` zeigt die Karte weder Markt noch Marktnummer** — stattdessen
+„Per Mail fragen". `marktFuer()` fällt bewusst nicht auf Wesel zurück: eine
+Nummer auszuliefern, deren Markt die Karte gerade verschweigt, schickt
+Kunden in ein Haus, in dem das Stück nicht steht.
+
+WhatsApp hängt **am Markt**, nicht global. Eine einzige Nummer für alle
+würde auf jeder Karte die marktgenaue Nummer ersetzen — genau die
+Zuordnung, um die es hier geht. Gibt es eine Nummer fürs ganze Haus, trägt
+man sie bei allen drei Märkten ein.
 
 `src/data/kontakt.ts` ist die **einzige** Stelle, an der eine Telefonnummer,
 eine Mailadresse oder eine Sprungmarke steht — Produktkarte, Standorte-Seite
@@ -66,6 +88,15 @@ Gegenprobe, muss leer bleiben:
 ```
 grep -rn "0281 147\|02364 50\|tel:+49\|riegel-interior.com" src/ | grep -v src/data/kontakt.ts
 ```
+
+### Telefonnummern werden nie geraten
+
+Schermbeck hat **keine eigene Leitung** — dort gilt die Weseler Nummer. Das
+ist kein Versehen. Eine Vorwahl 02853 oder die Mobilnummer aus dem
+Kleinanzeigen-Profil sehen plausibel aus, sind aber von niemandem
+bestätigt; eingetragen würden sie 48 Produktkarten auf eine fremde Leitung
+schicken. In `kontakt.ts` kommt nur, was unsere Seite oder ein Inserat
+ausdrücklich nennt.
 
 ### Was nicht erfunden wird
 
