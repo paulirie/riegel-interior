@@ -34,7 +34,7 @@ const FINISH = [{ val: "Geschliffen" }, { val: "Gebürstet" }];
 /* Die Töne sind an unseren eigenen Fotos abgenommen: die Eiche im Markt
    ist hell und leicht gräulich, nicht rotbraun. */
 const TONES = [
-  { val: "Natur", tone: "#c9b394" },
+  { val: "Natur", tone: "#d3bba4" },
   { val: "Hell gebeizt", tone: "#ddceb4" },
   { val: "Mittel gebeizt", tone: "#9b836a" },
   { val: "Dunkel gebeizt", tone: "#5f5141" },
@@ -76,7 +76,7 @@ export function Configurator() {
     ton: string; tone: string; form: string;
   }>({
     size: "200 cm", platte: 855, edge: "Baumkante", finish: "Geschliffen",
-    ton: "Natur", tone: "#c9b394", form: "U-Gestell",
+    ton: "Natur", tone: "#d3bba4", form: "U-Gestell",
   });
 
   const f = FORMS.find((x) => x.val === s.form) ?? FORMS[0];

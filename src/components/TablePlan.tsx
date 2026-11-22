@@ -89,7 +89,6 @@ export function TablePlan({
 
   const s0 = useMemo(() => ({
     deck: G.deck(seed), cham: G.chamfer(seed), band: G.band(seed), end: G.endFace(seed),
-    fries: G.fries(seed), mitre: G.mitre(seed),
     shade: G.shade(seed), base: G.base(seed), sp: G.spider(seed),
     dimL: G.dimLen(seed), dimD: G.dimDep(seed), det: G.detail(seed),
   }), [seed]);
@@ -117,10 +116,6 @@ export function TablePlan({
       const dk = G.deck(w);
       setD("clip", dk); setD("deck", dk); setD("ink", dk);
       setD("cham", G.chamfer(w)); setD("band", G.band(w)); setD("end", G.endFace(w));
-      setD("fries", G.fries(w)); setD("mitre", G.mitre(w));
-      /* Die Baumkante hat keinen Fries: der Ring blendet mit raw aus. */
-      const fo = Math.round((1 - w.raw) * 100) / 100;
-      setA("fries", { opacity: fo }); setA("mitre", { opacity: fo });
       setA("shade", G.shade(w));
 
       const b = G.base(w);
@@ -168,7 +163,6 @@ export function TablePlan({
       setD("xclip", dt.deck); setD("xdeck", dt.deck); setD("xink", dt.deck);
       setD("xcham", dt.cham); setD("xband", dt.band); setD("xbclip", dt.band);
       setD("xsaw", dt.saw);
-      setA("xsaw", { opacity: Math.round(w.raw * 100) / 100 });
     };
 
     const t: G.Vec = { ...vRef.current };
@@ -259,8 +253,11 @@ export function TablePlan({
             <g transform={G.planeTop(G.TOPZ)} className="plan__lams">
               {G.LAMS.map((l, i) => (
                 <rect key={i} className={"plan__lam plan__lam--" + (l.o < 0 ? "d" : "l")}
-                  x={l.x} y={l.y} width={l.w} height={G.LAM_H}
-                  fillOpacity={Math.abs(l.o)} />
+                  x={l.x} y={l.y} width={l.w} height={l.h}
+                  /* das Weiß liegt nur 54 Punkte über dem Grundton, das
+                     Dunkel 124 darunter — damit beide Richtungen gleich
+                     weit tragen, bekommt das helle Brett mehr Deckkraft */
+                  fillOpacity={l.o < 0 ? Math.abs(l.o) : Math.abs(l.o) * 2.4} />
               ))}
               {G.LAM_SEAMS.map((d, i) => <path key={i} className="plan__seam" d={d} />)}
               {G.LAM_ROWLINES.map((d, i) => <path key={i} className="plan__seam" d={d} />)}
@@ -268,9 +265,6 @@ export function TablePlan({
                 <ellipse key={i} className="plan__knot" cx={k.x} cy={k.y} rx={k.rx} ry={k.ry} />
               ))}
             </g>
-            {/* Friesleiste ringsum — rechnet in viewBox-Koordinaten */}
-            <path data-k="fries" className="plan__fries" fillRule="evenodd" d={s0.fries} />
-            <path data-k="mitre" className="plan__seam" d={s0.mitre} />
             <g transform={G.planeTop(G.TOPZ)}>
               <g className="plan__brush">
                 {G.MBRUSH.map((y) => <path key={y} className="plan__grain" d={G.mLine(y)} />)}
@@ -321,9 +315,11 @@ export function TablePlan({
             <clipPath id="det-band"><path data-k="xbclip" d={s0.det.band} /></clipPath>
           </defs>
           <path data-k="xband" className="plan__band" d={s0.det.band} />
-          {/* Sägeriefen der Baumkante, an der Stirnfläche geclippt */}
+          {/* Sägeriefen, an der Stirnfläche geclippt. Beide Detailfotos
+              zeigen sie auch an einer geraden Kante — sie hängen nicht an
+              der Baumkante. */}
           <g clipPath="url(#det-band)">
-            <path data-k="xsaw" className="plan__saw" d={s0.det.saw} opacity={0} />
+            <path data-k="xsaw" className="plan__saw" d={s0.det.saw} />
           </g>
           <path data-k="xcham" className="plan__cham" d={s0.det.cham} />
           <path data-k="xdeck" className="plan__deck" d={s0.det.deck} />

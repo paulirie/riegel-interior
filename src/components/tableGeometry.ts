@@ -159,17 +159,24 @@ export function endFace(v: Vec) {
        + "L" + s(v.len, q.y, TOPZ - c) + "Z";
 }
 
-/* ── Lamellen ─────────────────────────────────────────────────────────────
-   So sehen die Platten im Markt aus: schmale Eichenstäbe nebeneinander,
-   die Stöße von Reihe zu Reihe versetzt, dazwischen Stäbe in leicht
-   unterschiedlichem Ton. Das Raster steht FEST in Zentimetern und wird an
-   der Plattenkontur geclippt — eine größere Platte bekommt mehr Stäbe,
-   nicht breitere. Deshalb muss der Tween es auch nie anfassen.            */
-export const FRIES = 9;                // cm Friesbreite ringsum
-const LAM_ROW = 7.6;                   // cm Stabbreite
-const LAM_PITCH = 42;                  // cm mittlere Stablänge
-const LAM_ROWS = 15;                   // deckt 114 cm Tiefe
-const LAM_COLS = 11;                   // deckt rund 460 cm Länge
+/* ── Plattenbild ──────────────────────────────────────────────────────────
+   Die Platte, die dieser Konfigurator bepreist, steht auf unserem eigenen
+   Foto mit ihrem Schild da: "Tischplatte NaturLine Eiche 200/4 cm
+   vollmassiv, 1099 → 855,-" — genau der Preis, der hier voreingestellt
+   ist. Und die NaturLine ist KEINE Lamellenplatte mit Friesleiste: sie
+   besteht aus durchgehenden Brettern von rund 9 bis 16 cm Breite, die
+   längs laufen und nur selten gestoßen sind, und sie hat ringsum keinen
+   Fries. Das Mosaik mit Fries gehört zur Altholzplatte — ein anderes
+   Stück, das hier nicht zur Wahl steht.
+
+   Das Raster steht FEST in Zentimetern und wird an der Plattenkontur
+   geclippt: eine größere Platte bekommt mehr Bretter, nicht breitere.
+   Deshalb muss der Tween es nie anfassen.                                */
+const BRETT_MIN = 9;                   // cm schmalstes Brett
+const BRETT_MAX = 16;                  // cm breitestes
+const BRETT_LEN = 150;                 // cm mittlere Länge zwischen zwei Stößen
+const BRETT_ROWS = 14;                 // deckt über 110 cm Tiefe
+const BRETT_COLS = 7;                  // deckt über 460 cm Länge
 
 /* Lehmer-Generator auf ganzen Zahlen: s * 48271 bleibt unter 2^53, das
    Ergebnis ist auf Server und Client bitgleich. */
@@ -178,73 +185,46 @@ function rnd(seed: number) {
   return () => { n = (n * 48271) % 2147483647; return n / 2147483647; };
 }
 
-export type Lam = { x: number; y: number; w: number; o: number };
-export const LAM_H = LAM_ROW;
+export type Lam = { x: number; y: number; w: number; h: number; o: number };
 export const LAMS: Lam[] = (() => {
   const out: Lam[] = [];
   const g = rnd(19);
-  for (let k = 0; k < LAM_ROWS; k++) {
-    let x = -LAM_PITCH * (0.2 + 0.8 * g());      // Reihenversatz: Stöße stehen im Verband
-    for (let j = 0; j < LAM_COLS; j++) {
-      const w = LAM_PITCH * (0.5 + 1.0 * g());
+  let y = 0;
+  for (let k = 0; k < BRETT_ROWS; k++) {
+    const h = BRETT_MIN + (BRETT_MAX - BRETT_MIN) * g();
+    let x = -BRETT_LEN * (0.2 + 0.8 * g());   // Stöße stehen im Verband
+    for (let j = 0; j < BRETT_COLS; j++) {
+      const w = BRETT_LEN * (0.5 + 1.0 * g());
       out.push({
-        x: r(x), y: r(k * LAM_ROW), w: r(w),
-        o: Math.round((g() * 2 - 1) * 5) / 100,  // −0,05 … +0,05
+        x: r(x), y: r(y), w: r(w), h: r(h),
+        /* Im Foto liegen zwei Nachbarbretter bis zu 27 % Helligkeit
+           auseinander; ±0,05 war viel zu zahm. */
+        o: Math.round((g() * 2 - 1) * 14) / 100,
       });
       x += w;
     }
+    y += h;
   }
   return out;
 })();
-export const LAM_SEAMS = LAMS.map((l) => `M${l.x},${l.y}L${l.x},${r(l.y + LAM_ROW)}`);
-export const LAM_ROWLINES = Array.from({ length: LAM_ROWS - 1 }, (_, k) =>
-  `M-12,${r((k + 1) * LAM_ROW)}L392,${r((k + 1) * LAM_ROW)}`);
+export const LAM_SEAMS = LAMS.map((l) => `M${l.x},${l.y}L${l.x},${r(l.y + l.h)}`);
+export const LAM_ROWLINES = (() => {
+  const seen = new Set<number>(), out: string[] = [];
+  for (const l of LAMS) {
+    if (l.y > 0 && !seen.has(l.y)) { seen.add(l.y); out.push(`M-12,${l.y}L392,${l.y}`); }
+  }
+  return out;
+})();
 
-/* Astlöcher: feste Stellen im Brett, ebenfalls geclippt. */
-export const KNOTS = [
-  { x: 41, y: 23.5, rx: 2.1, ry: 1.2 },
-  { x: 118, y: 10.5, rx: 1.5, ry: 0.9 },
-  { x: 187, y: 49, rx: 1.8, ry: 1.1 },
-  { x: 262, y: 28, rx: 1.3, ry: 0.8 },
-];
-
-/** Friesleiste: Ring zwischen Plattenkontur und der um FRIES eingerückten
-    Kontur, als ein Pfad mit fill-rule evenodd. Eine Baumkante hat keinen
-    Fries — dort blendet er über 1 − raw aus. */
-export function fries(v: Vec) {
-  const c = SWISS_C * v.swiss, f = FRIES;
-  let d = "";
-  for (let i = 0; i <= SAMPLES; i++) {
-    const t = i / SAMPLES;
-    d += (i ? "L" : "M") + s(t * v.len, edgeAt(v, t).y + c, TOPZ);
-  }
-  for (let i = SAMPLES; i >= 0; i--) {
-    const t = i / SAMPLES;
-    d += "L" + s(t * v.len, backAt(v, t) - c, TOPZ);
-  }
-  d += "Z";
-  const x0 = f, x1 = Math.max(v.len - f, f + 2), L = Math.max(v.len, 1);
-  for (let i = 0; i <= SAMPLES; i++) {
-    const x = x0 + (i / SAMPLES) * (x1 - x0);
-    d += (i ? "L" : "M") + s(x, edgeAt(v, x / L).y + c + f, TOPZ);
-  }
-  for (let i = SAMPLES; i >= 0; i--) {
-    const x = x0 + (i / SAMPLES) * (x1 - x0);
-    d += "L" + s(x, backAt(v, x / L) - c - f, TOPZ);
-  }
-  return d + "Z";
-}
-/** Die vier Gehrungen in den Ecken des Frieses. */
-export function mitre(v: Vec) {
-  const c = SWISS_C * v.swiss, f = FRIES, L = Math.max(v.len, 1);
-  const yf0 = edgeAt(v, 0).y + c, yf1 = edgeAt(v, 1).y + c;
-  const yb0 = backAt(v, 0) - c, yb1 = backAt(v, 1) - c;
-  const x1 = Math.max(v.len - f, f + 2);
-  return "M" + s(0, yf0, TOPZ) + "L" + s(f, edgeAt(v, f / L).y + c + f, TOPZ)
-       + "M" + s(v.len, yf1, TOPZ) + "L" + s(x1, edgeAt(v, x1 / L).y + c + f, TOPZ)
-       + "M" + s(0, yb0, TOPZ) + "L" + s(f, backAt(v, f / L) - c - f, TOPZ)
-       + "M" + s(v.len, yb1, TOPZ) + "L" + s(x1, backAt(v, x1 / L) - c - f, TOPZ);
-}
+/* Äste und Risse: im Foto rund einer je 1400 cm². Feste Stellen im Brett,
+   ebenfalls geclippt. */
+export const KNOTS = (() => {
+  const g = rnd(23);
+  return Array.from({ length: 18 }, () => ({
+    x: r(4 + g() * 292), y: r(2 + g() * 108),
+    rx: r(0.8 + g() * 1.6), ry: r(0.5 + g() * 0.9),
+  }));
+})();
 
 /* ── Gestell ──────────────────────────────────────────────────────────────
    An der Wand in Wesel hängt eine ganze Reihe Untergestelle, und sie sind
@@ -263,19 +243,31 @@ export function mitre(v: Vec) {
 
    Beide Rahmen stehen quer zum Tisch, je einer unter einem Plattenende —
    so stehen sie auch im Markt.                                            */
-const RAIL_H = 6;                      // cm Höhe der oberen Montageplatte
+/* Die Montageplatte liegt waagerecht unter der Tischplatte; in der
+   Rahmenebene ist von ihr nur die Kante zu sehen. Auf beiden Fotos misst
+   die rund 1,5–2,3 cm — kein 6-cm-Balken, wie hier vorher stand. Die
+   Streben laufen dadurch über fast die ganze Höhe, wie im Foto (98 %). */
+const RAIL_H = 2;                      // cm, Kante der Montageplatte
 const RAIL_OUT = 3;                    // cm Überstand der Platte je Seite
-const LEG_W = 10;                      // cm Breite des Flachstahls (100er Flachstahl)
-const FOOT_H = 5;                      // cm Höhe von Kufe und Füßen
-const FOOT_L = 15;                     // cm Länge eines Einzelfußes
-const BAR_H = 5;                       // cm Höhe des Querriegels am A-Bock
+/* Nachgemessen: Strebe 4,5–6,5 cm, Kufe 5,5 cm — Streben und Kufe sind
+   derselbe Flachstahl, rund 60er. Die "100" im Namen U-100-100 ist also
+   weder die Materialbreite noch die Spannweite in Zentimetern. */
+const LEG_W = 6;                       // cm Breite des Flachstahls
+const FOOT_H = 5.5;                    // cm Höhe der durchgehenden Kufe
+const FOOT_L = 10;                     // cm Länge eines Einzelfußes
+/* Ein Einzelfuß ist ein flach liegendes Blech, keine Kufe: im Foto rund
+   1,4 cm dick gegen 5,5 cm bei der Kufe. */
+const FOOT_T = 1.5;                    // cm Dicke eines Einzelfußes
+const BAR_H = 5.5;                     // cm Höhe des Querriegels am A-Bock
 const BAR_Z = 0.42;                    // Anteil der Strebenhöhe, auf der er sitzt
-const BASE_W = 100;                    // cm Spannweite laut Preisschild (U-100-100)
+/* Außenmaß der Rahmen im Foto: 66–69 cm breit bei 72 cm Höhe, der
+   X-Balken noch schmaler. Ein Rahmen steht also hochkant, nicht quadratisch. */
+const BASE_W = 70;                     // cm Spannweite
 const FRAME_IN = 7;                    // cm Rücksprung der Rahmen von der Plattenkante
 /* Materialstärke des Flachstahls. Sie liegt quer zur Rahmenebene, also
    genau in x — in der Kavalier-Projektion ist das ein reiner Versatz nach
    rechts. Deshalb kann die Rückseite jedes Rahmens ein <use> sein. */
-export const TKX = 2.6;                // cm
+export const TKX = 1.2;                // cm
 export const TKDX = Math.round(TKX * K * 10) / 10;
 
 export type Form = { top: number; bot: number; kufe: number; bar: number };
@@ -343,7 +335,7 @@ export const legPath = (q: Base["legs"][number]) =>
   `M${r(q.yT - q.hw)},${HT - RAIL_H}L${r(q.yT + q.hw)},${HT - RAIL_H}` +
   `L${r(q.yF + q.hw)},0L${r(q.yF - q.hw)},0Z`;
 export const footPath = (q: Base["legs"][number]) =>
-  rectPath(q.yF - FOOT_L / 2, 0, FOOT_L, FOOT_H);
+  rectPath(q.yF - FOOT_L / 2, 0, FOOT_L, FOOT_T);
 
 /* ── Mittelfuß-Kreuzgestell ───────────────────────────────────────────────
    Die Reihe auf der Bank vor der Gestellwand: kein Rahmen an jedem Ende,
@@ -356,7 +348,7 @@ export const footPath = (q: Base["legs"][number]) =>
    Zentimetern, Breite waagerecht quer zur Laufrichtung, vier Ecken durch
    p() projiziert.                                                         */
 const SP_AX = 42;                      // cm, halbe Spannweite längs
-const SP_W = 9;                        // cm, Breite des Flachstahls
+const SP_W = 6.5;                      // cm, derselbe Flachstahl wie an den Rahmen
 
 function bar3(
   q0: [number, number, number],
@@ -464,8 +456,9 @@ export function detail(v: Vec) {
   ch += "Z";
   for (let i = DN; i >= 0; i--) { const e = q(i); bd += "L" + dp((i / DN) * DW, e.y, -e.dz); }
   bd += "Z";
-  /* Sägeschnitt auf der Stirnfläche: waagerechte Riefen, wie auf dem Foto
-     der Baumkante. Nur dort — eine gehobelte Kante hat sie nicht. */
+  /* Sägeschnitt auf der Stirnfläche: waagerechte Riefen. Auf detail-kante-1
+     und detail-kante-2 laufen die über die ganzen 4 cm — auch an der
+     geraden Kante. Sie hängen also nicht an der Baumkante. */
   for (let k = 1; k <= 6; k++) {
     const z = (TH * k) / 7;
     for (let i = 0; i <= 8; i++) {

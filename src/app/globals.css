@@ -550,15 +550,15 @@ image-slot{
    Gestell-Fahne und der Hinweis "Darstellung schematisch". */
 .plan{ display:block; width:100%; max-width:720px; margin-inline:auto;
   margin-bottom:clamp(64px,13vh,150px);
-  --fs:14.5; --grain-o:.34; --sheen-o:.3; --brush-o:.15; }
+  --fs:14.5; --grain-o:.2; --sheen-o:.3; --brush-o:.15; }
 /* gebürstet: mehr offene Pore, weniger Glanz — nicht eine andere Farbe */
-.plan[data-finish="brushed"]{ --grain-o:.5; --sheen-o:.12; --brush-o:.52; }
+.plan[data-finish="brushed"]{ --grain-o:.32; --sheen-o:.12; --brush-o:.52; }
 .plan text{ font-family:var(--sans); font-weight:500; fill:var(--stone);
   font-size:calc(var(--fs)*1px); letter-spacing:calc(var(--fs)*.12px); }
 
 /* Flächen: ein Farbton, vier Ebenen. Zuerst eine einfache Füllung als
    Rückfall, dann die abgeleitete — Browser ohne color-mix behalten die erste. */
-.plan__deck{ fill:#c9b394; fill:var(--top); transition:fill .6s var(--ease); }
+.plan__deck{ fill:#d3bba4; fill:var(--top); transition:fill .6s var(--ease); }
 .plan__cham{ fill:#dccab0; fill:color-mix(in oklab, var(--top) 84%, #fffdf7); transition:fill .6s var(--ease); }
 .plan__band{ fill:#a8947a; fill:color-mix(in oklab, var(--top) 78%, var(--ink)); transition:fill .6s var(--ease); }
 .plan__end { fill:#8f7d66; fill:color-mix(in oklab, var(--top) 64%, var(--ink)); transition:fill .6s var(--ease); }
@@ -573,20 +573,13 @@ image-slot{
 /* die obere Traverse steht im Licht und ist eine Spur heller */
 .plan__steel--rail{ fill:#2a2a30; fill:color-mix(in srgb, currentColor 82%, #ffffff); }
 
-/* Lamellen: so sind die Platten im Markt aufgebaut — schmale Eichenstäbe
-   im Verband, Ton für Ton etwas anders, dazwischen die Fugen. */
+/* Bretter: so ist die NaturLine aufgebaut — durchgehende Bretter längs,
+   Ton für Ton deutlich anders, dazwischen die Fugen. Kein Fries. */
 .plan__lam--d{ fill:#2b1f12; fill:color-mix(in oklab, var(--top) 26%, #2b1f12); }
 .plan__lam--l{ fill:#fffdf7; }
 .plan__seam{ fill:none; stroke:#6b5a44; stroke:color-mix(in oklab, var(--top) 42%, #241708);
   stroke-width:1; vector-effect:non-scaling-stroke; stroke-opacity:calc(var(--grain-o) * .55);
   transition:stroke .6s var(--ease), stroke-opacity .6s var(--ease); }
-/* Friesleiste ringsum. Quer zur Faser, deshalb eine Spur heller — und bei
-   der Baumkante gar nicht vorhanden, das regelt die Deckkraft im Tween. */
-.plan__fries{ fill:#d2bfa2; fill:color-mix(in oklab, var(--top) 90%, #fffdf7);
-  stroke:#6b5a44; stroke:color-mix(in oklab, var(--top) 44%, #241708);
-  stroke-width:1; stroke-opacity:.5; vector-effect:non-scaling-stroke;
-  transition:fill .6s var(--ease), stroke .6s var(--ease); }
-
 /* Striche bleiben Haarlinien, auch wenn die Zeichnung skaliert */
 .plan__ink, .plan__ink2{ fill:none; stroke:rgba(12,11,10,.5); stroke-width:1; vector-effect:non-scaling-stroke; }
 .plan__grain{ fill:none; stroke:#6b4a28; stroke:color-mix(in oklab, var(--top) 34%, #241708);
