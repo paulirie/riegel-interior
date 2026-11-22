@@ -25,7 +25,31 @@ function mkBezier(x1: number, y1: number, x2: number, y2: number) {
   };
 }
 const ease = mkBezier(0.22, 0.61, 0.36, 1);
-const DUR = 620;
+const DUR = 680;
+
+/* Ein Gestellrahmen, quer unter dem Plattenende. Beide Rahmen sind
+   identisch aufgebaut, nur ihr x unterscheidet sich.
+
+   Der Flachstahl ist materialstark; seine Rückseite liegt um TKX weiter
+   hinten. In dieser Projektion ist das ein reiner Versatz nach rechts —
+   also kann die Rückseite ein <use> desselben Rahmens sein, dunkler und
+   davor gezeichnet. Ein Satz Pfade, zwei sichtbare Flächen, und der Tween
+   muss nur die vordere anfassen. */
+function Frame({ i, b }: { i: number; b: G.Base }) {
+  return (
+    <>
+      <use href={`#plan-fr${i}`} transform={`translate(${G.TKDX} 0)`} className="plan__frame--deep" />
+      <g id={`plan-fr${i}`} data-k={"fr" + i} transform={G.planeSide(b.xs[i])} className="plan__frame">
+        <path data-k={"kufe" + i} className="plan__steel" d={G.kufePath(b)} opacity={b.kufeO} />
+        <path data-k={"foot" + i + "a"} className="plan__steel" d={G.footPath(b.legs[0])} />
+        <path data-k={"foot" + i + "b"} className="plan__steel" d={G.footPath(b.legs[1])} />
+        <path data-k={"leg" + i + "a"} className="plan__steel" d={G.legPath(b.legs[0])} />
+        <path data-k={"leg" + i + "b"} className="plan__steel" d={G.legPath(b.legs[1])} />
+        <path data-k={"rail" + i} className="plan__steel plan__steel--rail" d={G.railPath(b)} />
+      </g>
+    </>
+  );
+}
 
 export function TablePlan({
   v, open, finish, tone, edge, depLabel,
@@ -47,19 +71,12 @@ export function TablePlan({
   vRef.current = v;
   openRef.current = open;
 
-  const s0 = useMemo(() => {
-    const b = G.base(seed);
-    return {
-      deck: G.deck(seed), cham: G.chamfer(seed), band: G.band(seed), end: G.endFace(seed),
-      grain: Array.from({ length: G.GRAIN_LINES }, (_, k) => G.grain(seed, k)),
-      knots: G.KNOTS.map((k) => G.knot(seed, k)),
-      shade: G.shade(seed),
-      posts: b.posts.map((q) => G.postPath(q)),
-      feet: b.posts.map((q) => G.rectPath(q.xF - b.footL / 2, b.yc - b.footD / 2, b.footL, b.footD)),
-      brace: G.bracePath(b), braceO: b.braceO, yc: b.yc,
-      dimL: G.dimLen(seed), dimD: G.dimDep(seed), det: G.detail(seed),
-    };
-  }, [seed]);
+  const s0 = useMemo(() => ({
+    deck: G.deck(seed), cham: G.chamfer(seed), band: G.band(seed), end: G.endFace(seed),
+    fries: G.fries(seed), mitre: G.mitre(seed),
+    shade: G.shade(seed), base: G.base(seed),
+    dimL: G.dimLen(seed), dimD: G.dimDep(seed), det: G.detail(seed),
+  }), [seed]);
 
   useEffect(() => {
     const plan = planRef.current;
@@ -84,21 +101,27 @@ export function TablePlan({
       const dk = G.deck(w);
       setD("clip", dk); setD("deck", dk); setD("ink", dk);
       setD("cham", G.chamfer(w)); setD("band", G.band(w)); setD("end", G.endFace(w));
-      for (let k = 0; k < G.GRAIN_LINES; k++) setD("g" + k, G.grain(w, k));
-      G.KNOTS.forEach((kn, i) => setA("k" + i, G.knot(w, kn)));
+      setD("fries", G.fries(w)); setD("mitre", G.mitre(w));
+      /* Die Baumkante hat keinen Fries: der Ring blendet mit raw aus. */
+      const fo = Math.round((1 - w.raw) * 100) / 100;
+      setA("fries", { opacity: fo }); setA("mitre", { opacity: fo });
       setA("shade", G.shade(w));
 
       const b = G.base(w);
-      b.posts.forEach((q, i) => setD("post" + i, G.postPath(q)));
-      b.posts.forEach((q, i) =>
-        setD("foot" + i, G.rectPath(q.xF - b.footL / 2, b.yc - b.footD / 2, b.footL, b.footD)));
-      setD("brace", G.bracePath(b));
-      setA("brace", { opacity: Math.round(b.braceO * 100) / 100 });
+      for (let i = 0; i < 2; i++) {
+        const fr = el("fr" + i);
+        if (fr) fr.setAttribute("transform", G.planeSide(b.xs[i]));
+        setD("rail" + i, G.railPath(b));
+        setD("kufe" + i, G.kufePath(b));
+        setA("kufe" + i, { opacity: b.kufeO });
+        setD("leg" + i + "a", G.legPath(b.legs[0]));
+        setD("leg" + i + "b", G.legPath(b.legs[1]));
+        setD("foot" + i + "a", G.footPath(b.legs[0]));
+        setD("foot" + i + "b", G.footPath(b.legs[1]));
+      }
       const rt = el("root");
       if (rt) rt.setAttribute("transform", `translate(${G.centerDx(w)} 0)`);
       setA("flag", G.flagPos(w));
-      const bp = el("basePlane");
-      if (bp) bp.setAttribute("transform", G.planeFront(w.dep / 2 - 5));
 
       const dl = G.dimLen(w);
       setD("dimH", dl.help); setD("dimL", dl.line); setD("dimT", dl.ticks);
@@ -114,7 +137,9 @@ export function TablePlan({
 
       const dt = G.detail(w);
       setD("xclip", dt.deck); setD("xdeck", dt.deck); setD("xink", dt.deck);
-      setD("xcham", dt.cham); setD("xband", dt.band);
+      setD("xcham", dt.cham); setD("xband", dt.band); setD("xbclip", dt.band);
+      setD("xsaw", dt.saw);
+      setA("xsaw", { opacity: Math.round(w.raw * 100) / 100 });
     };
 
     const t: G.Vec = { ...vRef.current };
@@ -176,20 +201,15 @@ export function TablePlan({
         </defs>
 
         <g data-k="root" transform={`translate(${G.centerDx(seed)} 0)`}>
-        {/* Bodenebene: Schatten und Fußplatten liegen in derselben Ebene wie
-            die Maßlinie, sind also automatisch richtig verkürzt. */}
+        {/* Bodenebene: der Schatten liegt in derselben Ebene wie die
+            Maßlinie, ist also automatisch richtig verkürzt. */}
         <g transform={G.planeTop(0)}>
           <ellipse data-k="shade" fill="url(#plan-shade)" {...s0.shade} />
-          <path data-k="foot0" className="plan__steel" d={s0.feet[0]} />
-          <path data-k="foot1" className="plan__steel" d={s0.feet[1]} />
         </g>
 
-        {/* Gestell in der Mittelebene der Platte */}
-        <g data-k="basePlane" transform={G.planeFront(s0.yc - 5)}>
-          <path data-k="post0" className="plan__steel" d={s0.posts[0]} />
-          <path data-k="post1" className="plan__steel" d={s0.posts[1]} />
-          <path data-k="brace" className="plan__steel" d={s0.brace} opacity={s0.braceO} />
-        </g>
+        {/* Die beiden Gestellrahmen, quer unter den Plattenenden */}
+        <Frame i={0} b={s0.base} />
+        <Frame i={1} b={s0.base} />
 
         {/* Platte */}
         <g className="plan__faces">
@@ -200,20 +220,32 @@ export function TablePlan({
           {/* Der Clip-Pfad liegt in viewBox-Koordinaten, die Kinder rechnen in
               Zentimetern: deshalb trägt die äußere Gruppe den Clip und erst die
               innere die Ebenen-Matrix. Beides an einem Element wäre falsch. */}
-          <g clipPath="url(#plan-deck)"><g transform={G.planeTop(G.TOPZ)}>
-            <g className="plan__brush">
-              {G.MBRUSH.map((y) => <path key={y} className="plan__grain" d={G.mLine(y)} />)}
+          <g clipPath="url(#plan-deck)">
+            <g transform={G.planeTop(G.TOPZ)} className="plan__lams">
+              {G.LAMS.map((l, i) => (
+                <rect key={i} className={"plan__lam plan__lam--" + (l.o < 0 ? "d" : "l")}
+                  x={l.x} y={l.y} width={l.w} height={G.LAM_H}
+                  fillOpacity={Math.abs(l.o)} />
+              ))}
+              {G.LAM_SEAMS.map((d, i) => <path key={i} className="plan__seam" d={d} />)}
+              {G.LAM_ROWLINES.map((d, i) => <path key={i} className="plan__seam" d={d} />)}
+              {G.KNOTS.map((k, i) => (
+                <ellipse key={i} className="plan__knot" cx={k.x} cy={k.y} rx={k.rx} ry={k.ry} />
+              ))}
             </g>
-            {s0.grain.map((d, i) => <path key={i} data-k={"g" + i} className="plan__grain" d={d} />)}
-            {s0.knots.map((k, i) => (
-              <ellipse key={i} data-k={"k" + i} className="plan__knot"
-                cx={k.cx} cy={k.cy} rx={[3.4, 2.4, 2][i]} ry={[2, 1.5, 1.3][i]} />
-            ))}
-            <g className="plan__sheenwrap">
-              <rect className="plan__sheen" x={-20} y={-14} width={70} height={126}
-                fill="url(#plan-sheen)" />
+            {/* Friesleiste ringsum — rechnet in viewBox-Koordinaten */}
+            <path data-k="fries" className="plan__fries" fillRule="evenodd" d={s0.fries} />
+            <path data-k="mitre" className="plan__seam" d={s0.mitre} />
+            <g transform={G.planeTop(G.TOPZ)}>
+              <g className="plan__brush">
+                {G.MBRUSH.map((y) => <path key={y} className="plan__grain" d={G.mLine(y)} />)}
+              </g>
+              <g className="plan__sheenwrap">
+                <rect className="plan__sheen" x={-20} y={-14} width={70} height={126}
+                  fill="url(#plan-sheen)" />
+              </g>
             </g>
-          </g></g>
+          </g>
         </g>
         <path data-k="ink" className="plan__ink" d={s0.deck} />
 
@@ -251,8 +283,13 @@ export function TablePlan({
         >
           <defs>
             <clipPath id="det-deck"><path data-k="xclip" d={s0.det.deck} /></clipPath>
+            <clipPath id="det-band"><path data-k="xbclip" d={s0.det.band} /></clipPath>
           </defs>
           <path data-k="xband" className="plan__band" d={s0.det.band} />
+          {/* Sägeriefen der Baumkante, an der Stirnfläche geclippt */}
+          <g clipPath="url(#det-band)">
+            <path data-k="xsaw" className="plan__saw" d={s0.det.saw} opacity={0} />
+          </g>
           <path data-k="xcham" className="plan__cham" d={s0.det.cham} />
           <path data-k="xdeck" className="plan__deck" d={s0.det.deck} />
           <g clipPath="url(#det-deck)">

@@ -18,7 +18,7 @@ export function SiteFooter() {
           <div>
             <h4>Entdecken</h4>
             <ul>
-              <li><Link href="/shop">Shop</Link></li>
+              <li><Link href="/shop">Produkte</Link></li>
               <li><Link href="/konfigurator">Mix &amp; Match</Link></li>
               <li><Link href="/standorte">Standorte</Link></li>
               <li><Link href="/ueber-uns">Über uns</Link></li>

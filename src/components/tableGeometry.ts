@@ -11,6 +11,11 @@
    Der Maßstab ist konstant: 1 cm = K Einheiten, über alle Plattengrößen.
    Eine 240er Platte ist auf dem Schirm deshalb wirklich doppelt so lang
    wie eine 120er.
+
+   Vorbild sind die eigenen Fotos aus Wesel: die Platten sind keine
+   Baumscheiben, sondern Lamellenplatten — schmale Eichenstäbe im Verband,
+   ringsum eine Friesleiste. Die Gestelle sind die beiden, die im Markt an
+   der Wand hängen: U-100-100 und X-Balken-Set, Flachstahl schwarz.
    ───────────────────────────────────────────────────────────────────────── */
 
 export const K = 2.52;                 // Einheiten je Zentimeter
@@ -24,21 +29,15 @@ export const TH = 4;                   // Plattenstärke in cm (Schild: 4 cm sta
 export const HT = 72;                  // Gestellhöhe in cm — bewusst OHNE Maßzahl,
                                        // kein Schild und kein Inserat nennt sie
 export const TOPZ = HT + TH;
-export const INSET = 24;               // Rücksprung der Stützen vom Plattenende
-export const RAW_AMP = 4.5;            // cm, größter Ausschlag der Baumkante
+export const INSET = 26;               // Rücksprung der Rahmen vom Plattenende
+export const RAW_AMP = 3.2;            // cm, größter Ausschlag der Baumkante
 export const SWISS_C = 1.2;            // cm, Fasenbreite der Schweizer Kante
 export const SAMPLES = 48;             // Stützpunkte je Längskante — immer gleich viele
-export const GRAIN_LINES = 17;
-const GRAIN_STEP = 6.2;                // cm; konstant, also vermehren sich die
-                                       // Jahresringe mit der Tiefe statt sich zu dehnen
-const POST_W = 4;                      // Flachstahl, ohne Maßzahl
-const FOOT_L = 60, FOOT_D = 36;        // Fußplatte U-Gestell
-const SPLAY = 20;                      // Grad Neigung im X-Gestell
-const BRACE_Z = 26, BRACE_H = 4;
 
 export type Vec = { len: number; dep: number; raw: number; swiss: number; frm: number };
 
 const r = (n: number) => Math.round(n * 10) / 10;
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 export function p(x: number, y: number, z: number): [number, number] {
   return [OX + (x + y * SX) * K, OY - (y * SY + z) * K];
@@ -52,8 +51,10 @@ const s = (x: number, y: number, z: number) => {
    werden kann — ein <g transform> statt Projektion in jedem Pfad. */
 export const planeTop = (z: number) =>
   `matrix(${K} 0 ${r(SX * K)} ${r(-SY * K)} ${OX} ${r(OY - z * K)})`;
-export const planeFront = (y: number) =>
-  `matrix(${K} 0 0 ${-K} ${r(OX + y * SX * K)} ${r(OY - y * SY * K)})`;
+/** Ebene quer zum Tisch, bei festem x. Lokal wird in (Tiefe y, Höhe z) gerechnet —
+    darin liegen die beiden Gestellrahmen. */
+export const planeSide = (x: number) =>
+  `matrix(${r(SX * K)} ${r(-SY * K)} 0 ${-K} ${r(OX + x * K)} ${OY})`;
 
 /* Niederfrequente, deterministische Wuchskurve: drei Sinus mit
    inkommensurablen Frequenzen. Glatt — eine Baumkante ist keine Säge —
@@ -128,62 +129,145 @@ export function endFace(v: Vec) {
        + "L" + s(v.len, q.y, TOPZ - c) + "Z";
 }
 
-/** Jahresring k, in Zentimetern der Deckflächen-Ebene (planeTop(TOPZ)). */
-export function grain(v: Vec, k: number) {
-  const N = 16;
-  let d = "";
-  for (let i = 0; i <= N; i++) {
-    const t = i / N, q = edgeAt(v, t);
-    const y = q.y + 2.4 + (k + 1) * GRAIN_STEP + 1.1 * Math.sin(6.2832 * 1.7 * t + k * 1.9);
-    d += (i ? "L" : "M") + `${r(t * v.len)},${r(y)}`;
-  }
-  return d;
+/* ── Lamellen ─────────────────────────────────────────────────────────────
+   So sehen die Platten im Markt aus: schmale Eichenstäbe nebeneinander,
+   die Stöße von Reihe zu Reihe versetzt, dazwischen Stäbe in leicht
+   unterschiedlichem Ton. Das Raster steht FEST in Zentimetern und wird an
+   der Plattenkontur geclippt — eine größere Platte bekommt mehr Stäbe,
+   nicht breitere. Deshalb muss der Tween es auch nie anfassen.            */
+export const FRIES = 9;                // cm Friesbreite ringsum
+const LAM_ROW = 7.6;                   // cm Stabbreite
+const LAM_PITCH = 42;                  // cm mittlere Stablänge
+const LAM_ROWS = 15;                   // deckt 114 cm Tiefe
+const LAM_COLS = 11;                   // deckt rund 460 cm Länge
+
+/* Lehmer-Generator auf ganzen Zahlen: s * 48271 bleibt unter 2^53, das
+   Ergebnis ist auf Server und Client bitgleich. */
+function rnd(seed: number) {
+  let n = (seed % 2147483646) + 1;
+  return () => { n = (n * 48271) % 2147483647; return n / 2147483647; };
 }
 
-/* Astlöcher liegen auf der Deckfläche und werden an der Kantenkontur
-   geclippt — nicht mehr frei auf der Kante wie bisher. */
+export type Lam = { x: number; y: number; w: number; o: number };
+export const LAM_H = LAM_ROW;
+export const LAMS: Lam[] = (() => {
+  const out: Lam[] = [];
+  const g = rnd(19);
+  for (let k = 0; k < LAM_ROWS; k++) {
+    let x = -LAM_PITCH * (0.2 + 0.8 * g());      // Reihenversatz: Stöße stehen im Verband
+    for (let j = 0; j < LAM_COLS; j++) {
+      const w = LAM_PITCH * (0.5 + 1.0 * g());
+      out.push({
+        x: r(x), y: r(k * LAM_ROW), w: r(w),
+        o: Math.round((g() * 2 - 1) * 5) / 100,  // −0,05 … +0,05
+      });
+      x += w;
+    }
+  }
+  return out;
+})();
+export const LAM_SEAMS = LAMS.map((l) => `M${l.x},${l.y}L${l.x},${r(l.y + LAM_ROW)}`);
+export const LAM_ROWLINES = Array.from({ length: LAM_ROWS - 1 }, (_, k) =>
+  `M-12,${r((k + 1) * LAM_ROW)}L392,${r((k + 1) * LAM_ROW)}`);
+
+/* Astlöcher: feste Stellen im Brett, ebenfalls geclippt. */
 export const KNOTS = [
-  { t: 0.26, dy: 17 },
-  { t: 0.58, dy: 8.5 },
-  { t: 0.79, dy: 29 },
+  { x: 41, y: 23.5, rx: 2.1, ry: 1.2 },
+  { x: 118, y: 10.5, rx: 1.5, ry: 0.9 },
+  { x: 187, y: 49, rx: 1.8, ry: 1.1 },
+  { x: 262, y: 28, rx: 1.3, ry: 0.8 },
 ];
-export function knot(v: Vec, k: { t: number; dy: number }) {
-  const q = edgeAt(v, k.t);
-  return { cx: r(k.t * v.len), cy: r(q.y + k.dy) };
+
+/** Friesleiste: Ring zwischen Plattenkontur und der um FRIES eingerückten
+    Kontur, als ein Pfad mit fill-rule evenodd. Eine Baumkante hat keinen
+    Fries — dort blendet er über 1 − raw aus. */
+export function fries(v: Vec) {
+  const c = SWISS_C * v.swiss, f = FRIES;
+  let d = "";
+  for (let i = 0; i <= SAMPLES; i++) {
+    const t = i / SAMPLES;
+    d += (i ? "L" : "M") + s(t * v.len, edgeAt(v, t).y + c, TOPZ);
+  }
+  for (let i = SAMPLES; i >= 0; i--) {
+    const t = i / SAMPLES;
+    d += "L" + s(t * v.len, backAt(v, t) - c, TOPZ);
+  }
+  d += "Z";
+  const x0 = f, x1 = Math.max(v.len - f, f + 2), L = Math.max(v.len, 1);
+  for (let i = 0; i <= SAMPLES; i++) {
+    const x = x0 + (i / SAMPLES) * (x1 - x0);
+    d += (i ? "L" : "M") + s(x, edgeAt(v, x / L).y + c + f, TOPZ);
+  }
+  for (let i = SAMPLES; i >= 0; i--) {
+    const x = x0 + (i / SAMPLES) * (x1 - x0);
+    d += "L" + s(x, backAt(v, x / L) - c - f, TOPZ);
+  }
+  return d + "Z";
+}
+/** Die vier Gehrungen in den Ecken des Frieses. */
+export function mitre(v: Vec) {
+  const c = SWISS_C * v.swiss, f = FRIES, L = Math.max(v.len, 1);
+  const yf0 = edgeAt(v, 0).y + c, yf1 = edgeAt(v, 1).y + c;
+  const yb0 = backAt(v, 0) - c, yb1 = backAt(v, 1) - c;
+  const x1 = Math.max(v.len - f, f + 2);
+  return "M" + s(0, yf0, TOPZ) + "L" + s(f, edgeAt(v, f / L).y + c + f, TOPZ)
+       + "M" + s(v.len, yf1, TOPZ) + "L" + s(x1, edgeAt(v, x1 / L).y + c + f, TOPZ)
+       + "M" + s(0, yb0, TOPZ) + "L" + s(f, backAt(v, f / L) - c - f, TOPZ)
+       + "M" + s(v.len, yb1, TOPZ) + "L" + s(x1, backAt(v, x1 / L) - c - f, TOPZ);
 }
 
 /* ── Gestell ──────────────────────────────────────────────────────────────
-   U und X sind dasselbe Gebilde: zwei Streben, zwei Fußplatten, ein Riegel.
-   Ein Skalar frm fährt von 0 nach 1. Die Streben drehen um ihren oberen
-   Anschlusspunkt unter der Platte; ihre Länge wächst dabei um 1/cos θ,
-   damit der Fuß auf dem Boden bleibt. Kein display:none.                  */
+   Zwei Rahmen, je einer unter jedem Plattenende, beide quer zum Tisch —
+   so stehen sie auch im Markt. Jeder Rahmen ist dasselbe Gebilde: eine
+   Traverse oben, zwei Flachstahl-Streben, unten eine Kufe. Ein Skalar frm
+   fährt von 0 nach 1: die Füße wandern dabei auf die jeweils andere Seite.
+   frm = 0 → beide Streben senkrecht, Kufe durchgehend: U-100-100.
+   frm = 1 → die Streben haben die Seiten getauscht und kreuzen sich in der
+   Mitte, aus der Kufe sind zwei Füße geworden: X-Balken-Set.
+   Dazwischen steht ein V — eine Bewegung, kein Umschalter.               */
+const RAIL_H = 5;                      // cm Höhe der oberen Traverse
+const LEG_W = 10;                      // cm Breite des Flachstahls (100er Flachstahl)
+const FOOT_H = 5;                      // cm Höhe von Kufe und Füßen
+const FOOT_L = 19;                     // cm Länge eines Einzelfußes im X
+const BASE_W = 100;                    // cm Spannweite laut Preisschild (U-100-100)
+const FRAME_IN = 7;                    // cm Rücksprung der Rahmen von der Plattenkante
+/* Materialstärke des Flachstahls. Sie liegt quer zur Rahmenebene, also
+   genau in x — in der Kavalier-Projektion ist das ein reiner Versatz nach
+   rechts. Deshalb kann die Rückseite jedes Rahmens ein <use> sein. */
+export const TKX = 2.6;                // cm
+export const TKDX = Math.round(TKX * K * 10) / 10;
+
 export function base(v: Vec) {
-  const th = (SPLAY * Math.PI / 180) * v.frm;
-  const tan = Math.tan(th);
-  // waagerechte Halbbreite: quer zur Strebenachse bleibt sie damit POST_W dick
-  const hw = (POST_W / 2) / Math.cos(th);
-  const top = Math.max(v.len / 2 - INSET, 16);
+  const halfL = Math.max(v.len / 2 - INSET, 15);
+  const span = Math.min(BASE_W, Math.max(v.dep - 2 * FRAME_IN, 42));
   const yc = v.dep / 2;
-  const mid = v.len / 2;                 // der Tisch liegt bei x = 0..len,
-  const posts = [-1, 1].map((sg) => {    // das Gestell steht also mittig darunter
-    const xT = mid + sg * top, xF = mid + sg * (top + HT * tan);
-    return { xT, xF, hw, xB: xT + (xF - xT) * (HT - BRACE_Z) / HT };
+  const a = span / 2 - LEG_W / 2;            // Abstand Strebenmitte von der Rahmenmitte
+  const hz = HT - RAIL_H;                    // Höhe, über die die Strebe läuft
+  const legs = [-1, 1].map((sg) => {
+    const yT = yc + sg * a;
+    const yF = yc + sg * a * (1 - 2 * v.frm);
+    const hw = (LEG_W / 2) / Math.cos(Math.atan((yT - yF) / hz));
+    return { yT, yF, hw };
   });
   return {
-    posts,
-    footL: FOOT_L - (FOOT_L - 14) * v.frm,
-    footD: FOOT_D - (FOOT_D - 14) * v.frm,
+    xs: [v.len / 2 - halfL, v.len / 2 + halfL],
+    y0: yc - span / 2, span, legs,
+    /* die Kufe weicht, sobald die Streben zu kreuzen beginnen */
+    kufeO: Math.round((1 - clamp01(v.frm / 0.42)) * 100) / 100,
     yc,
-    // der Riegel kommt erst, wenn die Streben schon geneigt sind
-    braceO: Math.max(0, Math.min(1, (v.frm - 0.25) / 0.75)),
   };
 }
-export const postPath = (q: { xT: number; xF: number; hw: number }) =>
-  `M${r(q.xT - q.hw)},${HT}L${r(q.xT + q.hw)},${HT}L${r(q.xF + q.hw)},0L${r(q.xF - q.hw)},0Z`;
+export type Base = ReturnType<typeof base>;
+
 export const rectPath = (x: number, y: number, w: number, h: number) =>
   `M${r(x)},${r(y)}L${r(x + w)},${r(y)}L${r(x + w)},${r(y + h)}L${r(x)},${r(y + h)}Z`;
-export const bracePath = (b: ReturnType<typeof base>) =>
-  rectPath(b.posts[0].xB, BRACE_Z, b.posts[1].xB - b.posts[0].xB, BRACE_H);
+export const railPath = (b: Base) => rectPath(b.y0, HT - RAIL_H, b.span, RAIL_H);
+export const kufePath = (b: Base) => rectPath(b.y0, 0, b.span, FOOT_H);
+export const legPath = (q: Base["legs"][number]) =>
+  `M${r(q.yT - q.hw)},${HT - RAIL_H}L${r(q.yT + q.hw)},${HT - RAIL_H}` +
+  `L${r(q.yF + q.hw)},0L${r(q.yF - q.hw)},0Z`;
+export const footPath = (q: Base["legs"][number]) =>
+  rectPath(q.yF - FOOT_L / 2, 0, FOOT_L, FOOT_H);
 
 /** Maßlinie der Länge, in der Bodenebene vor dem Tisch. */
 export function dimLen(v: Vec) {
@@ -243,7 +327,7 @@ export function detail(v: Vec) {
   const c = SWISS_C * v.swiss;
   const tw = DW / Math.max(v.len, 1);
   const q = (i: number) => edgeAt(v, DT0 + (i / DN) * tw);
-  let dk = "", ch = "", bd = "";
+  let dk = "", ch = "", bd = "", saw = "";
   for (let i = 0; i <= DN; i++) {
     const x = (i / DN) * DW, e = q(i);
     dk += (i ? "L" : "M") + dp(x, e.y + c, TH);
@@ -255,7 +339,16 @@ export function detail(v: Vec) {
   ch += "Z";
   for (let i = DN; i >= 0; i--) { const e = q(i); bd += "L" + dp((i / DN) * DW, e.y, -e.dz); }
   bd += "Z";
-  return { deck: dk, cham: ch, band: bd };
+  /* Sägeschnitt auf der Stirnfläche: waagerechte Riefen, wie auf dem Foto
+     der Baumkante. Nur dort — eine gehobelte Kante hat sie nicht. */
+  for (let k = 1; k <= 6; k++) {
+    const z = (TH * k) / 7;
+    for (let i = 0; i <= 8; i++) {
+      const x = (i / 8) * DW, e = q(Math.round((i / 8) * DN));
+      saw += (i ? "L" : "M") + dp(x, e.y, z - e.dz * (1 - k / 7));
+    }
+  }
+  return { deck: dk, cham: ch, band: bd, saw };
 }
 export const DGRAIN = [1.3, 3.1, 5.0, 7.2];
 export const DBRUSH = Array.from({ length: 17 }, (_, i) => 0.7 + i * 0.5);
@@ -268,5 +361,5 @@ export const DBRACKET =
 /* Bürstlinien der Hauptansicht: gerade Haarlinien längs der Faser, in
    Zentimetern der Deckflächen-Ebene. Konstant — sie werden an der
    Kantenkontur geclippt, deshalb muss der Tween sie nicht anfassen. */
-export const MBRUSH = Array.from({ length: 30 }, (_, i) => 1.2 + i * 3.4);
-export const mLine = (y: number) => `M-6,${r(y)}L306,${r(y)}`;
+export const MBRUSH = Array.from({ length: 34 }, (_, i) => 1.0 + i * 3.3);
+export const mLine = (y: number) => `M-8,${r(y)}L372,${r(y)}`;

@@ -30,11 +30,13 @@ const EDGES = [{ val: "Baumkante" }, { val: "Schweizer Kante" }, { val: "Gerade 
 /* Geschliffen oder gebürstet laut Inserat; die Farbtöne sind Beispiele aus
    über zehn, die im Markt zur Auswahl stehen. */
 const FINISH = [{ val: "Geschliffen" }, { val: "Gebürstet" }];
+/* Die Töne sind an unseren eigenen Fotos abgenommen: die Eiche im Markt
+   ist hell und leicht gräulich, nicht rotbraun. */
 const TONES = [
-  { val: "Natur", tone: "#c8a878" },
-  { val: "Hell gebeizt", tone: "#ddc49c" },
-  { val: "Mittel gebeizt", tone: "#9a6a3c" },
-  { val: "Dunkel gebeizt", tone: "#5d4a34" },
+  { val: "Natur", tone: "#c9b394" },
+  { val: "Hell gebeizt", tone: "#ddceb4" },
+  { val: "Mittel gebeizt", tone: "#9b836a" },
+  { val: "Dunkel gebeizt", tone: "#5f5141" },
 ];
 const FORMS = [
   { val: "U-Gestell", form: "u", price: 279 },
@@ -62,7 +64,7 @@ export function Configurator() {
     ton: string; tone: string; form: string; formPrice: number;
   }>({
     size: "200 cm", platte: 855, edge: "Baumkante", finish: "Geschliffen",
-    ton: "Natur", tone: "#c8a878", form: "U-Gestell", formPrice: 279,
+    ton: "Natur", tone: "#c9b394", form: "U-Gestell", formPrice: 279,
   });
 
   /* Kein Preis für die größte Platte — dort steht "auf Anfrage" statt einer
